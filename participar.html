@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VI Colóquio EPT — Participar</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       RESET & BASE MOBILE-FIRST
+       ========================================================================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0d1117;
+      color: #f0f6fc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+    }
+
+    /* HEADER APP */
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #58a6ff, #bc8cff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    header p {
+      font-size: 0.85rem;
+      color: #8b949e;
+    }
+
+    /* NAVEGAÇÃO POR ABAS */
+    .tabs-nav {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      background: #161b22;
+      padding: 6px;
+      border-radius: 12px;
+      border: 1px solid #30363d;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: #8b949e;
+      padding: 10px 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn span {
+      font-size: 1.2rem;
+    }
+
+    .tab-btn.active {
+      background: #21262d;
+      color: #58a6ff;
+      border: 1px solid #30363d;
+    }
+
+    /* CONTAINER DOS FORMULÁRIOS */
+    .tab-content {
+      display: none;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 20px;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #c9d1d9;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    input[type="url"],
+    textarea {
+      width: 100%;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 12px;
+      color: #f0f6fc;
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, textarea:focus {
+      border-color: #58a6ff;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    /* INPUT DE ARQUIVO CUSTOMIZADO */
+    .file-input-wrapper {
+      position: relative;
+      background: #0d1117;
+      border: 2px dashed #30363d;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .file-input-wrapper input[type="file"] {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .file-preview {
+      max-width: 100%;
+      max-height: 150px;
+      border-radius: 6px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    /* BOTÃO SUBMIT */
+    .btn-submit {
+      width: 100%;
+      background: #238636;
+      color: #ffffff;
+      border: none;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s;
+    }
+
+    .btn-submit:active {
+      background: #2ea043;
+    }
+
+    .btn-submit:disabled {
+      background: #21262d;
+      color: #8b949e;
+      cursor: not-allowed;
+    }
+
+    /* FEEDBACK STATUS */
+    .status-msg {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      text-align: center;
+      display: none;
+    }
+
+    .status-msg.success {
+      background: rgba(46, 160, 67, 0.15);
+      border: 1px solid #2ea043;
+      color: #3fb950;
+    }
+
+    .status-msg.error {
+      background: rgba(248, 81, 73, 0.15);
+      border: 1px solid #f85149;
+      color: #f85149;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>VI Colóquio EPT</h1>
+    <p>Envie sua contribuição para o Telão</p>
+  </header>
+
+  <!-- SELETOR DE ABAS -->
+  <nav class="tabs-nav">
+    <button class="tab-btn active" onclick="switchTab('musica')">
+      <span>🎵</span> Música
+    </button>
+    <button class="tab-btn" onclick="switchTab('foto')">
+      <span>📸</span> Foto
+    </button>
+    <button class="tab-btn" onclick="switchTab('pesquisa')">
+      <span>🔬</span> Pesquisa
+    </button>
+  </nav>
+
+  <!-- FORMULÁRIO 1: MÚSICA -->
+  <section id="tab-musica" class="tab-content active">
+    <form id="form-musica" onsubmit="enviarMusica(event)">
+      <div class="form-group">
+        <label for="nome-musica">Seu Nome *</label>
+        <input type="text" id="nome-musica" required placeholder="Ex: Maria Silva">
+      </div>
+      <div class="form-group">
+        <label for="url-youtube">Link do YouTube *</label>
+        <input type="url" id="url-youtube" required placeholder="https://youtube.com/watch?v=...">
+      </div>
+      <button type="submit" class="btn-submit" id="btn-musica">
+        <span>ENVIAR MÚSICA</span>
+      </button>
+    </form>
+    <div id="status-musica" class="status-msg"></div>
+  </section>
+
+  <!-- FORMULÁRIO 2: FOTO -->
+  <section id="tab-foto" class="tab-content">
+    <form id="form-foto" onsubmit="enviarFoto(event)">
+      <div class="form-group">
+        <label for="nome-foto">Seu Nome *</label>
+        <input type="text" id="nome-foto" required placeholder="Ex: João Souza">
+      </div>
+      <div class="form-group">
+        <label>Selecione ou Tire uma Foto *</label>
+        <div class="file-input-wrapper">
+          <span id="file-label">📷 Escolher imagem</span>
+          <input type="file" id="arquivo-foto" accept="image/*" required onchange="previewImagem(event)">
+        </div>
+        <img id="img-preview" class="file-preview" alt="Prévia da Foto">
+      </div>
+      <div class="form-group">
+        <label for="msg-foto">Mensagem (opcional)</label>
+        <input type="text" id="msg-foto" placeholder="Ex: Excelente evento!">
+      </div>
+      <button type="submit" class="btn-submit" id="btn-foto">
+        <span>ENVIAR FOTO</span>
+      </button>
+    </form>
+    <div id="status-foto" class="status-msg"></div>
+  </section>
+
+  <!-- FORMULÁRIO 3: PESQUISA -->
+  <section id="tab-pesquisa" class="tab-content">
+    <form id="form-pesquisa" onsubmit="enviarPesquisa(event)">
+      <div class="form-group">
+        <label for="nome-pesquisa">Seu Nome *</label>
+        <input type="text" id="nome-pesquisa" required placeholder="Ex: Ana Lima">
+      </div>
+      <div class="form-group">
+        <label for="texto-pesquisa">O que você está pesquisando? *</label>
+        <textarea id="texto-pesquisa" required placeholder="Resuma em poucas palavras o tema do seu trabalho..."></textarea>
+      </div>
+      <button type="submit" class="btn-submit" id="btn-pesquisa">
+        <span>ENVIAR PESQUISA</span>
+      </button>
+    </form>
+    <div id="status-pesquisa" class="status-msg"></div>
+  </section>
+
+  <script>
+    /* ==========================================================================
+       CONFIGURAÇÕES
+       ========================================================================== */
+    // Substitua pela URL da sua API do Apps Script gerada no deploy
+    const API_URL = 'https://script.google.com/macros/s/SEU_SCRIPT_ID_AQUI/exec';
+
+    /* ==========================================================================
+       TROCA DE ABAS
+       ========================================================================== */
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+      event.currentTarget.classList.add('active');
+      document.getElementById(`tab-${tabName}`).classList.add('active');
+    }
+
+    /* ==========================================================================
+       PRÉ-VISUALIZAÇÃO DE IMAGEM
+       ========================================================================== */
+    function previewImagem(event) {
+      const file = event.target.files[0];
+      const preview = document.getElementById('img-preview');
+      const label = document.getElementById('file-label');
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+          label.innerText = `✓ ${file.name}`;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    /* ==========================================================================
+       ENVIO DOS FORMULÁRIOS (POST PARA O GAS)
+       ========================================================================== */
+    async function enviarMusica(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-musica');
+      const status = document.getElementById('status-musica');
+      
+      const payload = {
+        action: 'enviarMusica',
+        nome: document.getElementById('nome-musica').value.trim(),
+        youtubeUrl: document.getElementById('url-youtube').value.trim()
+      };
+
+      await enviarDados(payload, btn, status, 'form-musica');
+    }
+
+    async function enviarFoto(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-foto');
+      const status = document.getElementById('status-foto');
+      const fileInput = document.getElementById('arquivo-foto');
+      const file = fileInput.files[0];
+
+      if (!file) return;
+
+      btn.disabled = true;
+      btn.innerText = 'Processando imagem...';
+
+      // Converter Imagem para Base64
+      const reader = new FileReader();
+      reader.onload = async function() {
+        const base64Data = reader.result;
+        
+        const payload = {
+          action: 'enviarFoto',
+          nome: document.getElementById('nome-foto').value.trim(),
+          mensagem: document.getElementById('msg-foto').value.trim(),
+          fotoBase64: base64Data,
+          mimeType: file.type
+        };
+
+        await enviarDados(payload, btn, status, 'form-foto');
+        document.getElementById('img-preview').style.display = 'none';
+        document.getElementById('file-label').innerText = '📷 Escolher imagem';
+      };
+
+      reader.readAsDataURL(file);
+    }
+
+    async function enviarPesquisa(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-pesquisa');
+      const status = document.getElementById('status-pesquisa');
+
+      const payload = {
+        action: 'enviarPesquisa',
+        nome: document.getElementById('nome-pesquisa').value.trim(),
+        pesquisa: document.getElementById('texto-pesquisa').value.trim()
+      };
+
+      await enviarDados(payload, btn, status, 'form-pesquisa');
+    }
+
+    /* ==========================================================================
+       FUNÇÃO DE REQUISIÇÃO GENÉRICA
+       ========================================================================== */
+    async function enviarDados(payload, btnElement, statusElement, formId) {
+      btnElement.disabled = true;
+      const textoOriginal = btnElement.innerText;
+      btnElement.innerText = 'Enviando...';
+      
+      statusElement.style.display = 'none';
+      statusElement.className = 'status-msg';
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+
+        const json = await response.json();
+
+        if (json.status === 'success') {
+          statusElement.innerText = '✅ Enviado com sucesso! Aguardando moderação da comissão.';
+          statusElement.classList.add('success');
+          document.getElementById(formId).reset();
+        } else {
+          statusElement.innerText = `❌ Erro: ${json.message || 'Falha ao enviar.'}`;
+          statusElement.classList.add('error');
+        }
+      } catch (err) {
+        statusElement.innerText = '❌ Erro de conexão com o servidor.';
+        statusElement.classList.add('error');
+      } finally {
+        statusElement.style.display = 'block';
+        btnElement.disabled = false;
+        btnElement.innerText = textoOriginal;
+      }
+    }
+  </script>
+</body>
+</html>

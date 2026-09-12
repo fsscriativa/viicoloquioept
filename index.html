@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VI Colóquio de Pesquisas em EPT — Painel Principal</title>
+  
+  <!-- Estilos e Fontes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       RESET & BASE (PROPORÇÃO 16:9 E DARK THEME)
+       ========================================================================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0d1117;
+      color: #f0f6fc;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: 80px 1fr 120px;
+      gap: 16px;
+      padding: 16px;
+    }
+
+    /* HEADER */
+    header {
+      background: #161b22;
+      border: 1fr solid #30363d;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      background: linear-gradient(90deg, #58a6ff, #bc8cff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-transform: uppercase;
+    }
+
+    /* MAIN CONTAINER (GRID DE 3 COLUNAS) */
+    main {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr 1fr;
+      gap: 16px;
+      height: 100%;
+      min-height: 0;
+    }
+
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .card-header {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid #30363d;
+      padding-bottom: 8px;
+    }
+
+    /* COLUNA 1: PLAYLIST YOUTUBE */
+    #player-container {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    #player {
+      width: 100%;
+      height: 100%;
+    }
+
+    .proximas-list {
+      list-style: none;
+      margin-top: 8px;
+      overflow-y: auto;
+    }
+
+    .proximas-list li {
+      background: #21262d;
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+      color: #8b949e;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* COLUNA 2: MURAL DE FOTOS */
+    .foto-frame {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: #0d1117;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .foto-frame img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      transition: opacity 0.5s ease-in-out;
+    }
+
+    .foto-caption {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      background: rgba(22, 27, 34, 0.9);
+      padding: 12px;
+      text-align: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .foto-caption .nome {
+      font-weight: 600;
+      color: #58a6ff;
+    }
+
+    /* COLUNA 3: O QUE VOCÊ ESTÁ PESQUISANDO? */
+    .pesquisas-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+    }
+
+    .pesquisa-item {
+      background: #21262d;
+      border-left: 4px solid #bc8cff;
+      padding: 12px;
+      border-radius: 0 8px 8px 0;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    .pesquisa-item .autor {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #7ee787;
+      margin-bottom: 4px;
+    }
+
+    .pesquisa-item .texto {
+      font-size: 0.95rem;
+      line-height: 1.4;
+      color: #c9d1d9;
+    }
+
+    /* FOOTER (CHAMADA E QR CODE) */
+    footer {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 32px;
+    }
+
+    .cta-text {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .cta-text h2 {
+      font-size: 1.5rem;
+      color: #f0f6fc;
+    }
+
+    .cta-text p {
+      color: #8b949e;
+      font-size: 1.1rem;
+    }
+
+    .qrcode-box {
+      background: #ffffff;
+      padding: 6px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qrcode-box img {
+      width: 80px;
+      height: 80px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <h1>VI Colóquio de Pesquisas em EPT</h1>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL (16:9 3 COLUNAS) -->
+  <main>
+    
+    <!-- COLUNA 1: PLAYLIST -->
+    <section class="card">
+      <div class="card-header">
+        <span>🎵</span> Playlist Colaborativa
+      </div>
+      <div id="player-container">
+        <div id="player"></div>
+      </div>
+      <span style="font-size: 0.8rem; color: #8b949e; margin-bottom: 4px;">PRÓXIMAS MÚSICAS:</span>
+      <ul class="proximas-list" id="proximas-list">
+        <li>Aguardando envios...</li>
+      </ul>
+    </section>
+
+    <!-- COLUNA 2: MURAL DE FOTOS -->
+    <section class="card">
+      <div class="card-header">
+        <span>📸</span> Mural do Evento
+      </div>
+      <div class="foto-frame">
+        <img id="foto-exibida" src="" alt="Mural de Fotos" style="opacity: 0;">
+        <div class="foto-caption" id="foto-caption" style="display: none;">
+          <span class="nome" id="foto-nome"></span>
+          <p id="foto-mensagem" style="font-size: 0.85rem; color: #c9d1d9;"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- COLUNA 3: MURAL DE PESQUISAS -->
+    <section class="card">
+      <div class="card-header">
+        <span>🔬</span> O que você está pesquisando?
+      </div>
+      <div class="pesquisas-container" id="pesquisas-container">
+        <!-- Inserido dinamicamente via JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="cta-text">
+      <h2>📱 PARTICIPE DO NOSSO EVENTO</h2>
+      <p>Aponte a câmera do seu celular para o QR Code ao lado e envie suas músicas, fotos e pesquisas!</p>
+    </div>
+    <div class="qrcode-box">
+      <!-- Gerador dinâmico de QR Code via API pública do Google Charts -->
+      <img id="qrcode-img" src="" alt="QR Code para Participar">
+    </div>
+  </footer>
+
+  <!-- SCRIPT DO YOUTUBE IFRAME API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+
+  <script>
+    /* ==========================================================================
+       CONFIGURAÇÕES E ESTADO DA APLICAÇÃO
+       ========================================================================== */
+    
+    // Substitua pela URL da sua API do Apps Script gerada no deploy
+    const API_URL = 'https://script.google.com/macros/s/SEU_SCRIPT_ID_AQUI/exec';
+    
+    // URL da página do participante (onde estará hospedado o participar.html)
+    const PARTICIPAR_URL = window.location.href.replace('index.html', '') + 'participar.html';
+
+    let ytPlayer = null;
+    let videoAtualId = null;
+    let fotosLista = [];
+    let fotoIndexAtual = 0;
+    let fotoTimer = null;
+
+    // Gerar QR Code do Footer automaticamente
+    document.getElementById('qrcode-img').src = 
+      `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(PARTICIPAR_URL)}`;
+
+    /* ==========================================================================
+       YOUTUBE PLAYER ENGINE
+       ========================================================================== */
+    function onYouTubeIframeAPIReady() {
+      ytPlayer = new YT.Player('player', {
+        height: '100%',
+        width: '100%',
+        playerVars: {
+          'autoplay': 1,
+          'controls': 1,
+          'rel': 0
+        },
+        events: {
+          'onStateChange': onPlayerStateChange
+        }
+      });
+    }
+
+    function onPlayerStateChange(event) {
+      // Quando o vídeo termina (YT.PlayerState.ENDED = 0)
+      if (event.data === 0) {
+        carregarDados(); // Força buscar a próxima música
+      }
+    }
+
+    /* ==========================================================================
+       CARROSSEL DE FOTOS ENGINE
+       ========================================================================== */
+    function iniciarCarrosselFotos(novasFotos) {
+      if (!novasFotos || novasFotos.length === 0) return;
+      
+      fotosLista = novasFotos;
+      
+      if (!fotoTimer) {
+        exibirFotoAtual();
+        fotoTimer = setInterval(() => {
+          fotoIndexAtual = (fotoIndexAtual + 1) % fotosLista.length;
+          exibirFotoAtual();
+        }, 10000); // 10 Segundos por foto
+      }
+    }
+
+    function exibirFotoAtual() {
+      if (fotosLista.length === 0) return;
+      
+      const foto = fotosLista[fotoIndexAtual];
+      const imgElement = document.getElementById('foto-exibida');
+      const captionElement = document.getElementById('foto-caption');
+      
+      imgElement.style.opacity = '0';
+      
+      setTimeout(() => {
+        imgElement.src = foto.driveUrl;
+        document.getElementById('foto-nome').innerText = foto.nome;
+        document.getElementById('foto-mensagem').innerText = foto.mensagem || '';
+        
+        captionElement.style.display = 'block';
+        imgElement.style.opacity = '1';
+      }, 500);
+    }
+
+    /* ==========================================================================
+       COMUNICAÇÃO COM O BACKEND (POLLING A CADA 5s)
+       ========================================================================== */
+    async function carregarDados() {
+      try {
+        const response = await fetch(`${API_URL}?action=getPainelData`);
+        const json = await response.json();
+
+        if (json.status === 'success') {
+          atualizarPlaylist(json.data.musica);
+          iniciarCarrosselFotos(json.data.fotos);
+          atualizarPesquisas(json.data.pesquisas);
+        }
+      } catch (err) {
+        console.error("Erro ao buscar dados do Painel:", err);
+      }
+    }
+
+    function atualizarPlaylist(musicaData) {
+      if (!musicaData || !ytPlayer) return;
+
+      // 1. Tocar música atual
+      if (musicaData.atual && musicaData.atual.YOUTUBE_ID !== videoAtualId) {
+        videoAtualId = musicaData.atual.YOUTUBE_ID;
+        ytPlayer.loadVideoById(videoAtualId);
+      }
+
+      // 2. Atualizar Lista de Próximas
+      const listEl = document.getElementById('proximas-list');
+      listEl.innerHTML = '';
+
+      if (musicaData.proximas && musicaData.proximas.length > 0) {
+        musicaData.proximas.forEach(item => {
+          const li = document.createElement('li');
+          li.innerText = `• ${item.NOME}`;
+          listEl.appendChild(li);
+        });
+      } else {
+        listEl.innerHTML = '<li>Nenhuma música na fila</li>';
+      }
+    }
+
+    function atualizarPesquisas(pesquisas) {
+      const container = document.getElementById('pesquisas-container');
+      container.innerHTML = '';
+
+      if (!pesquisas || pesquisas.length === 0) {
+        container.innerHTML = '<p style="color:#8b949e">Nenhuma pesquisa enviada ainda.</p>';
+        return;
+      }
+
+      // Renderiza as 5 últimas pesquisas aprovadas
+      pesquisas.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'pesquisa-item';
+        card.innerHTML = `
+          <div class="autor">${escapeHtml(p.NOME)}</div>
+          <div class="texto">"${escapeHtml(p.PESQUISA)}"</div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function escapeHtml(text) {
+      return text ? text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+    }
+
+    // Inicialização
+    carregarDados();
+    setInterval(carregarDados, 5000); // Polling a cada 5 segundos
+
+  </script>
+</body>
+</html>
