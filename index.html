@@ -372,16 +372,13 @@
     }
 
     function onPlayerError(event) {
-      console.warn("Erro ao reproduzir o vídeo do YouTube:", event.data);
-      const errorOverlay = document.getElementById('player-error-overlay');
-      errorOverlay.style.display = 'flex';
-
-      // Aguarda 5 segundos mostrando o aviso de erro e recarrega os dados para ir pra próxima
-      setTimeout(() => {
-        errorOverlay.style.display = 'none';
-        carregarDados();
-      }, 5000);
-    }
+  console.warn("Vídeo com restrição de embedding detectado. Pulando para a próxima...");
+  
+  // Pula para a próxima música em meio segundo de forma imperceptível
+  setTimeout(() => {
+    carregarDados();
+  }, 500);
+}
 
     /* ==========================================================================
        CARROSSEL DE FOTOS ENGINE
