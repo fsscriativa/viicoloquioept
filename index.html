@@ -354,6 +354,9 @@
 
     let ytPlayer = null;
     let videoAtualId = null;
+    let filaLocal = []; // Gerenciamento local da playlist
+    let idsProcessados = new Set(); // Evita duplicações
+    
     let fotosLista = [];
     let fotoIndexAtual = 0;
     let fotoTimer = null;
@@ -416,8 +419,8 @@
 
     function onPlayerStateChange(event) {
       // Quando o vídeo termina (YT.PlayerState.ENDED = 0)
-      if (event.data === 0) {
-        carregarDados();
+      if (event.data === YT.PlayerState.ENDED) {
+        tocarProximaLocal();
       }
     }
 
@@ -425,11 +428,61 @@
       console.warn("Erro ao reproduzir o vídeo no YouTube (Código: " + event.data + "). Pulando para o próximo...");
       document.getElementById('player-error-overlay').style.display = 'flex';
       
-      // Pula para a próxima música automaticamente
+      // Pula para a próxima música em caso de erro no vídeo
       setTimeout(() => {
+        tocarProximaLocal();
+      }, 2000);
+    }
+
+    /* ==========================================================================
+       GERENCIADOR LOCAL DA PLAYLIST (OPÇÃO A)
+       ========================================================================== */
+    function tocarProximaLocal() {
+      // Se não houver músicas na fila local, tenta re-sincronizar
+      if (filaLocal.length === 0) {
         videoAtualId = null;
+        renderizarFilaUI();
         carregarDados();
-      }, 1000);
+        return;
+      }
+
+      // Remove a próxima música da fila local
+      const proximaMusica = filaLocal.shift();
+      const ytId = obterYouTubeId(proximaMusica.YOUTUBE_ID || proximaMusica.URL || proximaMusica.youtubeUrl);
+
+      if (ytId && ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+        videoAtualId = ytId;
+        document.getElementById('player-error-overlay').style.display = 'none';
+
+        ytPlayer.loadVideoById({
+          videoId: videoAtualId,
+          startSeconds: 0
+        });
+
+        if (somAtivado) {
+          ytPlayer.unMute();
+        }
+      } else {
+        // Se a URL/ID for inválido, tenta a seguinte
+        tocarProximaLocal();
+      }
+
+      renderizarFilaUI();
+    }
+
+    function renderizarFilaUI() {
+      const listEl = document.getElementById('proximas-list');
+      listEl.innerHTML = '';
+
+      if (filaLocal.length > 0) {
+        filaLocal.forEach(item => {
+          const li = document.createElement('li');
+          li.innerText = `• ${item.NOME || item.nome || 'Música enviada'}`;
+          listEl.appendChild(li);
+        });
+      } else {
+        listEl.innerHTML = '<li>Nenhuma música na fila</li>';
+      }
     }
 
     /* ==========================================================================
@@ -477,7 +530,7 @@
         const json = await response.json();
 
         if (json.status === 'success') {
-          atualizarPlaylist(json.data.musica);
+          processarMusicasRecebidas(json.data.musica);
           iniciarCarrosselFotos(json.data.fotos);
           atualizarPesquisas(json.data.pesquisas);
         }
@@ -486,42 +539,38 @@
       }
     }
 
-    function atualizarPlaylist(musicaData) {
-      if (!musicaData || !ytPlayer) return;
+    function processarMusicasRecebidas(musicaData) {
+      if (!musicaData) return;
 
-      // 1. Tocar música atual tratada
-      if (musicaData.atual) {
-        const idLimpo = obterYouTubeId(musicaData.atual.YOUTUBE_ID || musicaData.atual.URL);
-        
-        if (idLimpo && idLimpo !== videoAtualId) {
-          videoAtualId = idLimpo;
-          document.getElementById('player-error-overlay').style.display = 'none';
+      const todasDaApi = [];
+      if (musicaData.atual) todasDaApi.push(musicaData.atual);
+      if (musicaData.proximas && Array.isArray(musicaData.proximas)) {
+        todasDaApi.push(...musicaData.proximas);
+      }
+
+      // Adiciona novas faixas da API à fila local (sem duplicar)
+      todasDaApi.forEach(m => {
+        const idUnico = m.ID || m.YOUTUBE_ID || m.youtubeUrl;
+        if (idUnico && !idsProcessados.has(idUnico)) {
+          idsProcessados.add(idUnico);
           
-          if (typeof ytPlayer.loadVideoById === 'function') {
-            ytPlayer.loadVideoById({
-              videoId: videoAtualId,
-              startSeconds: 0
-            });
-            if (somAtivado) {
-              ytPlayer.unMute();
+          // Se não há nenhum vídeo tocando no momento, toca esse imediatamente
+          if (!videoAtualId && filaLocal.length === 0) {
+            const ytId = obterYouTubeId(m.YOUTUBE_ID || m.URL || m.youtubeUrl);
+            if (ytId && ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+              videoAtualId = ytId;
+              document.getElementById('player-error-overlay').style.display = 'none';
+              ytPlayer.loadVideoById({ videoId: videoAtualId, startSeconds: 0 });
+              if (somAtivado) ytPlayer.unMute();
             }
+          } else {
+            // Caso contrário, enfileira
+            filaLocal.push(m);
           }
         }
-      }
+      });
 
-      // 2. Atualizar Lista de Próximas
-      const listEl = document.getElementById('proximas-list');
-      listEl.innerHTML = '';
-
-      if (musicaData.proximas && musicaData.proximas.length > 0) {
-        musicaData.proximas.forEach(item => {
-          const li = document.createElement('li');
-          li.innerText = `• ${item.NOME}`;
-          listEl.appendChild(li);
-        });
-      } else {
-        listEl.innerHTML = '<li>Nenhuma música na fila</li>';
-      }
+      renderizarFilaUI();
     }
 
     function atualizarPesquisas(pesquisas) {
@@ -549,8 +598,8 @@
       return text ? text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
     }
 
-    // Inicialização
-    setInterval(carregarDados, 5000); // Polling a cada 5 segundos
+    // Inicialização do Polling (a cada 5 segundos)
+    setInterval(carregarDados, 5000);
 
   </script>
 </body>
