@@ -36,7 +36,7 @@
     /* HEADER */
     header {
       background: #161b22;
-      border: 1fr solid #30363d;
+      border: 1px solid #30363d;
       border-radius: 12px;
       display: flex;
       align-items: center;
@@ -92,11 +92,28 @@
       border-radius: 8px;
       overflow: hidden;
       margin-bottom: 12px;
+      position: relative;
     }
 
     #player {
       width: 100%;
       height: 100%;
+    }
+
+    .player-overlay-error {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #161b22;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      text-align: center;
+      z-index: 10;
     }
 
     .proximas-list {
@@ -246,6 +263,10 @@
       </div>
       <div id="player-container">
         <div id="player"></div>
+        <div id="player-error-overlay" class="player-overlay-error" style="display: none;">
+          <h3 style="color: #f85149; font-size: 1.1rem; margin-bottom: 6px;">⚠️ Vídeo Bloqueado no Telão</h3>
+          <p style="font-size: 0.85rem; color: #8b949e;">Este vídeo possui restrições de reprodução externa do próprio YouTube.</p>
+        </div>
       </div>
       <span style="font-size: 0.8rem; color: #8b949e; margin-bottom: 4px;">PRÓXIMAS MÚSICAS:</span>
       <ul class="proximas-list" id="proximas-list">
@@ -286,7 +307,6 @@
       <p>Aponte a câmera do seu celular para o QR Code ao lado e envie suas músicas, fotos e pesquisas!</p>
     </div>
     <div class="qrcode-box">
-      <!-- Gerador dinâmico de QR Code via API pública do Google Charts -->
       <img id="qrcode-img" src="" alt="QR Code para Participar">
     </div>
   </footer>
@@ -298,11 +318,8 @@
     /* ==========================================================================
        CONFIGURAÇÕES E ESTADO DA APLICAÇÃO
        ========================================================================== */
-    
-    // Substitua pela URL da sua API do Apps Script gerada no deploy
     const API_URL = 'https://script.google.com/macros/s/AKfycbwa58GZydsOBuZf8aVYtPHWB8preklPytCy6I3KdJQkAfYkAFSElUcYCn2qcZ7IV76J/exec';
     
-    // URL da página do participante (onde estará hospedado o participar.html)
     const PARTICIPAR_URL = window.location.href.replace('index.html', '') + 'participar.html';
 
     let ytPlayer = null;
@@ -316,7 +333,20 @@
       `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(PARTICIPAR_URL)}`;
 
     /* ==========================================================================
-       YOUTUBE PLAYER ENGINE
+       UTILITÁRIO: SANITIZADOR DE ID DO YOUTUBE
+       ========================================================================== */
+    function obterYouTubeId(urlOuId) {
+      if (!urlOuId) return null;
+      if (urlOuId.length === 11 && !urlOuId.includes('/') && !urlOuId.includes('.')) {
+        return urlOuId;
+      }
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+      const match = urlOuId.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : null;
+    }
+
+    /* ==========================================================================
+       YOUTUBE PLAYER ENGINE WITH ERROR HANDLING
        ========================================================================== */
     function onYouTubeIframeAPIReady() {
       ytPlayer = new YT.Player('player', {
@@ -328,7 +358,8 @@
           'rel': 0
         },
         events: {
-          'onStateChange': onPlayerStateChange
+          'onStateChange': onPlayerStateChange,
+          'onError': onPlayerError
         }
       });
     }
@@ -336,8 +367,20 @@
     function onPlayerStateChange(event) {
       // Quando o vídeo termina (YT.PlayerState.ENDED = 0)
       if (event.data === 0) {
-        carregarDados(); // Força buscar a próxima música
+        carregarDados(); // Busca a próxima música
       }
+    }
+
+    function onPlayerError(event) {
+      console.warn("Erro ao reproduzir o vídeo do YouTube:", event.data);
+      const errorOverlay = document.getElementById('player-error-overlay');
+      errorOverlay.style.display = 'flex';
+
+      // Aguarda 5 segundos mostrando o aviso de erro e recarrega os dados para ir pra próxima
+      setTimeout(() => {
+        errorOverlay.style.display = 'none';
+        carregarDados();
+      }, 5000);
     }
 
     /* ==========================================================================
@@ -397,10 +440,15 @@
     function atualizarPlaylist(musicaData) {
       if (!musicaData || !ytPlayer) return;
 
-      // 1. Tocar música atual
-      if (musicaData.atual && musicaData.atual.YOUTUBE_ID !== videoAtualId) {
-        videoAtualId = musicaData.atual.YOUTUBE_ID;
-        ytPlayer.loadVideoById(videoAtualId);
+      // 1. Tocar música atual tratada
+      if (musicaData.atual) {
+        const idLimpo = obterYouTubeId(musicaData.atual.YOUTUBE_ID || musicaData.atual.URL);
+        
+        if (idLimpo && idLimpo !== videoAtualId) {
+          videoAtualId = idLimpo;
+          document.getElementById('player-error-overlay').style.display = 'none';
+          ytPlayer.loadVideoById(videoAtualId);
+        }
       }
 
       // 2. Atualizar Lista de Próximas
