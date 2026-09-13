@@ -79,9 +79,32 @@
       margin-bottom: 16px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: space-between;
       border-bottom: 1px solid #30363d;
       padding-bottom: 8px;
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* BOTÃO DE ATIVAÇÃO DE ÁUDIO DO NAVEGADOR */
+    .btn-audio {
+      background: #238636;
+      color: #ffffff;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-audio:hover {
+      background: #2ea043;
     }
 
     /* COLUNA 1: PLAYLIST YOUTUBE */
@@ -259,13 +282,16 @@
     <!-- COLUNA 1: PLAYLIST -->
     <section class="card">
       <div class="card-header">
-        <span>🎵</span> Playlist Colaborativa
+        <div class="card-title">
+          <span>🎵</span> Playlist Colaborativa
+        </div>
+        <button id="btn-ativar-som" class="btn-audio" onclick="ativarSomTelao()">🔊 Ativar Som</button>
       </div>
       <div id="player-container">
         <div id="player"></div>
         <div id="player-error-overlay" class="player-overlay-error" style="display: none;">
-          <h3 style="color: #f85149; font-size: 1.1rem; margin-bottom: 6px;">⚠️ Vídeo Bloqueado no Telão</h3>
-          <p style="font-size: 0.85rem; color: #8b949e;">Este vídeo possui restrições de reprodução externa do próprio YouTube.</p>
+          <h3 style="color: #f85149; font-size: 1.1rem; margin-bottom: 6px;">⚠️ Carregando música...</h3>
+          <p style="font-size: 0.85rem; color: #8b949e;">Ajustando reprodução no telão.</p>
         </div>
       </div>
       <span style="font-size: 0.8rem; color: #8b949e; margin-bottom: 4px;">PRÓXIMAS MÚSICAS:</span>
@@ -277,7 +303,9 @@
     <!-- COLUNA 2: MURAL DE FOTOS -->
     <section class="card">
       <div class="card-header">
-        <span>📸</span> Mural do Evento
+        <div class="card-title">
+          <span>📸</span> Mural do Evento
+        </div>
       </div>
       <div class="foto-frame">
         <img id="foto-exibida" src="" alt="Mural de Fotos" style="opacity: 0;">
@@ -288,10 +316,12 @@
       </div>
     </section>
 
-    <!-- COLUNA 3: MURAL DE PESQUISAS -->
+    <!-- COLUNA 3: O QUE VOCÊ ESTÁ PESQUISANDO? -->
     <section class="card">
       <div class="card-header">
-        <span>🔬</span> O que você está pesquisando?
+        <div class="card-title">
+          <span>🔬</span> O que você está pesquisando?
+        </div>
       </div>
       <div class="pesquisas-container" id="pesquisas-container">
         <!-- Inserido dinamicamente via JS -->
@@ -327,6 +357,7 @@
     let fotosLista = [];
     let fotoIndexAtual = 0;
     let fotoTimer = null;
+    let somAtivado = false;
 
     // Gerar QR Code do Footer automaticamente
     document.getElementById('qrcode-img').src = 
@@ -346,39 +377,60 @@
     }
 
     /* ==========================================================================
-       YOUTUBE PLAYER ENGINE WITH ERROR HANDLING
+       YOUTUBE PLAYER ENGINE AJUSTADO
        ========================================================================== */
     function onYouTubeIframeAPIReady() {
       ytPlayer = new YT.Player('player', {
         height: '100%',
         width: '100%',
+        host: 'https://www.youtube-nocookie.com',
         playerVars: {
           'autoplay': 1,
+          'mute': 1, // Mudo no início para evitar erro de bloqueio do navegador
           'controls': 1,
-          'rel': 0
+          'rel': 0,
+          'enablejsapi': 1,
+          'origin': window.location.origin
         },
         events: {
+          'onReady': onPlayerReady,
           'onStateChange': onPlayerStateChange,
           'onError': onPlayerError
         }
       });
     }
 
+    function onPlayerReady(event) {
+      carregarDados();
+    }
+
+    function ativarSomTelao() {
+      if (ytPlayer && typeof ytPlayer.unMute === 'function') {
+        ytPlayer.unMute();
+        ytPlayer.setVolume(100);
+        somAtivado = true;
+        document.getElementById('btn-ativar-som').innerText = '🔊 Som Ativado';
+        document.getElementById('btn-ativar-som').style.background = '#1f6feb';
+      }
+    }
+
     function onPlayerStateChange(event) {
       // Quando o vídeo termina (YT.PlayerState.ENDED = 0)
       if (event.data === 0) {
-        carregarDados(); // Busca a próxima música
+        carregarDados();
       }
     }
 
     function onPlayerError(event) {
-  console.warn("Vídeo com restrição de embedding detectado. Pulando para a próxima...");
-  
-  // Pula para a próxima música em meio segundo de forma imperceptível
-  setTimeout(() => {
-    carregarDados();
-  }, 500);
-}
+      console.warn("Erro ao reproduzir o vídeo no YouTube (Código: " + event.data + "). Pulando para o próximo...");
+      document.getElementById('player-error-overlay').style.display = 'flex';
+      
+      // Pula para a próxima música automaticamente
+      setTimeout(() => {
+        videoAtualId = null;
+        carregarDados();
+      }, 1000);
+    }
 
     /* ==========================================================================
        CARROSSEL DE FOTOS ENGINE
@@ -444,7 +496,16 @@
         if (idLimpo && idLimpo !== videoAtualId) {
           videoAtualId = idLimpo;
           document.getElementById('player-error-overlay').style.display = 'none';
-          ytPlayer.loadVideoById(videoAtualId);
+          
+          if (typeof ytPlayer.loadVideoById === 'function') {
+            ytPlayer.loadVideoById({
+              videoId: videoAtualId,
+              startSeconds: 0
+            });
+            if (somAtivado) {
+              ytPlayer.unMute();
+            }
+          }
         }
       }
 
@@ -489,7 +550,6 @@
     }
 
     // Inicialização
-    carregarDados();
     setInterval(carregarDados, 5000); // Polling a cada 5 segundos
 
   </script>
