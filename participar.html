@@ -340,49 +340,94 @@
     }
 
     /* ==========================================================================
-       COMPRESSÃO DE IMAGEM (OTIMIZADA PARA CHROME MOBILE / iOS / ANDROID)
+       COMPRESSÃO DE IMAGEM (OTIMIZADA PARA MEMÓRIA NO CHROME MOBILE)
        ========================================================================== */
     async function comprimirImagem(file, maxDimension, quality) {
       const objectUrl = URL.createObjectURL(file);
+      let imgSource = null;
+      let canvas = null;
 
       try {
-        const imgSource = await new Promise((resolve, reject) => {
+        imgSource = await new Promise((resolve, reject) => {
           const img = new Image();
-          img.crossOrigin = 'anonymous';
           img.onload = () => resolve(img);
           img.onerror = () => reject(new Error("Falha ao decodificar a imagem no navegador."));
           img.src = objectUrl;
         });
 
-        let width = imgSource.naturalWidth || imgSource.width;
-        let height = imgSource.naturalHeight || imgSource.height;
+        let currentWidth = imgSource.naturalWidth || imgSource.width;
+        let currentHeight = imgSource.naturalHeight || imgSource.height;
 
-        if (width > height) {
-          if (width > maxDimension) {
-            height = Math.round((height * maxDimension) / width);
-            width = maxDimension;
+        let targetWidth = currentWidth;
+        let targetHeight = currentHeight;
+
+        if (currentWidth > currentHeight) {
+          if (currentWidth > maxDimension) {
+            targetHeight = Math.round((currentHeight * maxDimension) / currentWidth);
+            targetWidth = maxDimension;
           }
         } else {
-          if (height > maxDimension) {
-            width = Math.round((width * maxDimension) / height);
-            height = maxDimension;
+          if (currentHeight > maxDimension) {
+            targetWidth = Math.round((currentWidth * maxDimension) / currentHeight);
+            targetHeight = maxDimension;
           }
         }
 
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
+        canvas = document.createElement('canvas');
+        let ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        let stepCanvas = document.createElement('canvas');
+        let stepCtx = stepCanvas.getContext('2d');
+
+        stepCanvas.width = currentWidth;
+        stepCanvas.height = currentHeight;
+        stepCtx.drawImage(imgSource, 0, 0);
+
+        while (currentWidth / 2 >= targetWidth) {
+          currentWidth = Math.floor(currentWidth / 2);
+          currentHeight = Math.floor(currentHeight / 2);
+
+          let tempCanvas = document.createElement('canvas');
+          tempCanvas.width = currentWidth;
+          tempCanvas.height = currentHeight;
+          let tempCtx = tempCanvas.getContext('2d');
+          tempCtx.drawImage(stepCanvas, 0, 0, stepCanvas.width, stepCanvas.height, 0, 0, currentWidth, currentHeight);
+
+          stepCanvas.width = currentWidth;
+          stepCanvas.height = currentHeight;
+          stepCtx.drawImage(tempCanvas, 0, 0);
+          
+          tempCanvas.width = 0;
+          tempCanvas.height = 0;
+        }
+
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
         ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, width, height);
-        ctx.drawImage(imgSource, 0, 0, width, height);
+        ctx.fillRect(0, 0, targetWidth, targetHeight);
+        ctx.drawImage(stepCanvas, 0, 0, stepCanvas.width, stepCanvas.height, 0, 0, targetWidth, targetHeight);
+
+        stepCanvas.width = 0;
+        stepCanvas.height = 0;
 
         const dataUrl = canvas.toDataURL('image/jpeg', quality);
         return dataUrl.split(',')[1];
 
       } finally {
         URL.revokeObjectURL(objectUrl);
+
+        if (imgSource) {
+          imgSource.onload = null;
+          imgSource.onerror = null;
+          imgSource.src = '';
+          imgSource = null;
+        }
+
+        if (canvas) {
+          canvas.width = 0;
+          canvas.height = 0;
+          canvas = null;
+        }
       }
     }
 
@@ -423,7 +468,7 @@
       status.className = 'status-msg';
 
       try {
-        const base64Limpo = await comprimirImagem(file, 1280, 0.8);
+        const base64Limpo = await comprimirImagem(file, 1280, 0.75);
 
         const payload = {
           action: 'enviarFoto',
@@ -437,6 +482,7 @@
         await enviarDados(payload, btn, status, 'form-foto', textoOriginal);
 
         document.getElementById('img-preview').style.display = 'none';
+        document.getElementById('img-preview').src = '';
         document.getElementById('file-label').innerText = '📷 Escolher imagem';
 
       } catch (err) {
