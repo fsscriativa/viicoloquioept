@@ -410,9 +410,9 @@
         return;
       }
 
+      const textoOriginal = btn.innerHTML;
       btn.disabled = true;
-      const textoOriginal = btn.innerText;
-      btn.innerText = 'Compressando imagem...';
+      btn.innerText = 'Comprimindo imagem...';
       
       status.style.display = 'none';
       status.className = 'status-msg';
@@ -430,9 +430,9 @@
         };
 
         btn.innerText = 'Enviando...';
-        await enviarDados(payload, btn, status, 'form-foto');
+        await enviarDados(payload, btn, status, 'form-foto', textoOriginal);
 
-        // Reseta prévia visual
+        // Reseta prévia visual após sucesso
         document.getElementById('img-preview').style.display = 'none';
         document.getElementById('file-label').innerText = '📷 Escolher imagem';
 
@@ -442,7 +442,7 @@
         status.classList.add('error');
         status.style.display = 'block';
         btn.disabled = false;
-        btn.innerText = textoOriginal;
+        btn.innerHTML = textoOriginal;
       }
     }
 
@@ -463,12 +463,10 @@
     /* ==========================================================================
        FUNÇÃO DE REQUISIÇÃO GENÉRICA
        ========================================================================== */
-    async function enviarDados(payload, btnElement, statusElement, formId) {
+    async function enviarDados(payload, btnElement, statusElement, formId, overrideTextoOriginal = null) {
+      const textoOriginal = overrideTextoOriginal || btnElement.innerHTML;
       btnElement.disabled = true;
-      const textoOriginal = btnElement.innerText;
-      if (!btnElement.innerText.includes('Enviando')) {
-        btnElement.innerText = 'Enviando...';
-      }
+      btnElement.innerText = 'Enviando...';
       
       statusElement.style.display = 'none';
       statusElement.className = 'status-msg';
@@ -497,7 +495,7 @@
       } finally {
         statusElement.style.display = 'block';
         btnElement.disabled = false;
-        btnElement.innerText = textoOriginal;
+        btnElement.innerHTML = textoOriginal;
       }
     }
   </script>
