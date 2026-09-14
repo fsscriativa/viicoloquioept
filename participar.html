@@ -157,12 +157,41 @@
       cursor: pointer;
     }
 
+    /* CONTAINER DE PRÉ-VISUALIZAÇÃO DA IMAGEM */
+    .preview-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
     .file-preview {
       max-width: 100%;
-      max-height: 150px;
+      max-height: 200px;
       border-radius: 6px;
-      margin-top: 10px;
       display: none;
+      transition: transform 0.3s ease;
+    }
+
+    .btn-rotate {
+      display: none;
+      margin-top: 12px;
+      background: #21262d;
+      color: #58a6ff;
+      border: 1px solid #30363d;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+
+    .btn-rotate:active {
+      background: #30363d;
     }
 
     /* BOTÃO SUBMIT */
@@ -272,7 +301,13 @@
           <span id="file-label">📷 Escolher imagem</span>
           <input type="file" id="arquivo-foto" accept="image/*" required onchange="previewImagem(event)">
         </div>
-        <img id="img-preview" class="file-preview" alt="Prévia da Foto">
+        
+        <div class="preview-container">
+          <img id="img-preview" class="file-preview" alt="Prévia da Foto">
+          <button type="button" id="btn-rotate" class="btn-rotate" onclick="girarImagem()">
+            🔄 Girar Imagem
+          </button>
+        </div>
       </div>
       <div class="form-group">
         <label for="msg-foto">Mensagem (opcional)</label>
@@ -305,9 +340,10 @@
 
   <script>
     /* ==========================================================================
-       CONFIGURAÇÕES
+       CONFIGURAÇÕES E VARIÁVEIS GLOBAIS
        ========================================================================== */
     const API_URL = 'https://script.google.com/macros/s/AKfycbwyVME1Q6nlICmyJg-mTiPxIn987m1OCXL7H_CiXal19vNpKUXSv1rolldCE5ydj27D/exec';
+    let anguloAtual = 0;
 
     /* ==========================================================================
        TROCA DE ABAS
@@ -321,28 +357,40 @@
     }
 
     /* ==========================================================================
-       PRÉ-VISUALIZAÇÃO DE IMAGEM
+       PRÉ-VISUALIZAÇÃO E ROTAÇÃO DE IMAGEM
        ========================================================================== */
     function previewImagem(event) {
       const file = event.target.files[0];
       const preview = document.getElementById('img-preview');
       const label = document.getElementById('file-label');
+      const btnRotate = document.getElementById('btn-rotate');
+
+      // Reseta a rotação para 0° ao selecionar novo arquivo
+      anguloAtual = 0;
 
       if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
           preview.src = e.target.result;
+          preview.style.transform = 'rotate(0deg)';
           preview.style.display = 'block';
+          btnRotate.style.display = 'inline-flex';
           label.innerText = `✓ ${file.name}`;
         };
         reader.readAsDataURL(file);
       }
     }
 
+    function girarImagem() {
+      anguloAtual = (anguloAtual + 90) % 360;
+      const preview = document.getElementById('img-preview');
+      preview.style.transform = `rotate(${anguloAtual}deg)`;
+    }
+
     /* ==========================================================================
-       COMPRESSÃO DE IMAGEM (OTIMIZADA PARA MEMÓRIA NO CHROME MOBILE)
+       COMPRESSÃO E ROTAÇÃO REAL DA IMAGEM NO CANVAS
        ========================================================================== */
-    async function comprimirImagem(file, maxDimension, quality) {
+    async function comprimirImagem(file, maxDimension, quality, degrees) {
       const objectUrl = URL.createObjectURL(file);
       let imgSource = null;
       let canvas = null;
@@ -355,20 +403,25 @@
           img.src = objectUrl;
         });
 
-        let currentWidth = imgSource.naturalWidth || imgSource.width;
-        let currentHeight = imgSource.naturalHeight || imgSource.height;
+        const naturalWidth = imgSource.naturalWidth || imgSource.width;
+        const naturalHeight = imgSource.naturalHeight || imgSource.height;
 
-        let targetWidth = currentWidth;
-        let targetHeight = currentHeight;
+        // Se a rotação for 90° ou 270°, invertemos as dimensões para cálculo da escala
+        const isRotated90or270 = degrees === 90 || degrees === 270;
+        const sourceWidth = isRotated90or270 ? naturalHeight : naturalWidth;
+        const sourceHeight = isRotated90or270 ? naturalWidth : naturalHeight;
 
-        if (currentWidth > currentHeight) {
-          if (currentWidth > maxDimension) {
-            targetHeight = Math.round((currentHeight * maxDimension) / currentWidth);
+        let targetWidth = sourceWidth;
+        let targetHeight = sourceHeight;
+
+        if (sourceWidth > sourceHeight) {
+          if (sourceWidth > maxDimension) {
+            targetHeight = Math.round((sourceHeight * maxDimension) / sourceWidth);
             targetWidth = maxDimension;
           }
         } else {
-          if (currentHeight > maxDimension) {
-            targetWidth = Math.round((currentWidth * maxDimension) / currentHeight);
+          if (sourceHeight > maxDimension) {
+            targetWidth = Math.round((sourceWidth * maxDimension) / sourceHeight);
             targetHeight = maxDimension;
           }
         }
@@ -376,39 +429,23 @@
         canvas = document.createElement('canvas');
         let ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-        let stepCanvas = document.createElement('canvas');
-        let stepCtx = stepCanvas.getContext('2d');
-
-        stepCanvas.width = currentWidth;
-        stepCanvas.height = currentHeight;
-        stepCtx.drawImage(imgSource, 0, 0);
-
-        while (currentWidth / 2 >= targetWidth) {
-          currentWidth = Math.floor(currentWidth / 2);
-          currentHeight = Math.floor(currentHeight / 2);
-
-          let tempCanvas = document.createElement('canvas');
-          tempCanvas.width = currentWidth;
-          tempCanvas.height = currentHeight;
-          let tempCtx = tempCanvas.getContext('2d');
-          tempCtx.drawImage(stepCanvas, 0, 0, stepCanvas.width, stepCanvas.height, 0, 0, currentWidth, currentHeight);
-
-          stepCanvas.width = currentWidth;
-          stepCanvas.height = currentHeight;
-          stepCtx.drawImage(tempCanvas, 0, 0);
-          
-          tempCanvas.width = 0;
-          tempCanvas.height = 0;
-        }
-
         canvas.width = targetWidth;
         canvas.height = targetHeight;
+
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, targetWidth, targetHeight);
-        ctx.drawImage(stepCanvas, 0, 0, stepCanvas.width, stepCanvas.height, 0, 0, targetWidth, targetHeight);
 
-        stepCanvas.width = 0;
-        stepCanvas.height = 0;
+        // Aplica transformações de rotação no contexto do canvas
+        ctx.save();
+        ctx.translate(targetWidth / 2, targetHeight / 2);
+        ctx.rotate((degrees * Math.PI) / 180);
+
+        if (isRotated90or270) {
+          ctx.drawImage(imgSource, -targetHeight / 2, -targetWidth / 2, targetHeight, targetWidth);
+        } else {
+          ctx.drawImage(imgSource, -targetWidth / 2, -targetHeight / 2, targetWidth, targetHeight);
+        }
+        ctx.restore();
 
         const dataUrl = canvas.toDataURL('image/jpeg', quality);
         return dataUrl.split(',')[1];
@@ -468,7 +505,8 @@
       status.className = 'status-msg';
 
       try {
-        const base64Limpo = await comprimirImagem(file, 1280, 0.75);
+        // Passa o anguloAtual para rotacionar e comprimir corretamente
+        const base64Limpo = await comprimirImagem(file, 1280, 0.75, anguloAtual);
 
         const payload = {
           action: 'enviarFoto',
@@ -481,9 +519,12 @@
         btn.innerText = 'Enviando...';
         await enviarDados(payload, btn, status, 'form-foto', textoOriginal);
 
+        // Limpa visualização
         document.getElementById('img-preview').style.display = 'none';
         document.getElementById('img-preview').src = '';
+        document.getElementById('btn-rotate').style.display = 'none';
         document.getElementById('file-label').innerText = '📷 Escolher imagem';
+        anguloAtual = 0;
 
       } catch (err) {
         console.error("Erro ao processar imagem:", err);
