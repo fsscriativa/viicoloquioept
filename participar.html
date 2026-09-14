@@ -340,45 +340,70 @@
     }
 
     /* ==========================================================================
-       COMPRESSÃO DE IMAGEM (CANVAS)
+       COMPRESSÃO DE IMAGEM (OTIMIZADA PARA MOBILE / iOS / ANDROID)
        ========================================================================== */
-    function comprimirImagem(file, maxDimension, quality) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = (event) => {
-          const img = new Image();
-          img.src = event.target.result;
-          img.onload = () => {
-            let width = img.width;
-            let height = img.height;
+    async function comprimirImagem(file, maxDimension, quality) {
+      let imgSource;
+      let width, height;
 
-            if (width > height) {
-              if (width > maxDimension) {
-                height = Math.round((height * maxDimension) / width);
-                width = maxDimension;
-              }
-            } else {
-              if (height > maxDimension) {
-                width = Math.round((width * maxDimension) / height);
-                height = maxDimension;
-              }
-            }
+      // 1. Tenta usar createImageBitmap (Processamento direto na GPU / Menos RAM)
+      if ('createImageBitmap' in window) {
+        try {
+          imgSource = await createImageBitmap(file);
+          width = imgSource.width;
+          height = imgSource.height;
+        } catch (e) {
+          console.warn("createImageBitmap falhou, caindo para FileReader:", e);
+        }
+      }
 
-            const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-
-            const dataUrl = canvas.toDataURL('image/jpeg', quality);
-            // Retorna apenas a string Base64 limpa (sem o prefixo "data:image/jpeg;base64,")
-            resolve(dataUrl.split(',')[1]);
+      // 2. Fallback com FileReader (Caso o navegador não suporte createImageBitmap)
+      if (!imgSource) {
+        imgSource = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = (err) => reject(new Error("Erro ao carregar objeto Image."));
+            img.src = event.target.result;
           };
-          img.onerror = (err) => reject(err);
-        };
-        reader.onerror = (err) => reject(err);
-      });
+          reader.onerror = (err) => reject(err);
+          reader.readAsDataURL(file);
+        });
+        width = imgSource.width;
+        height = imgSource.height;
+      }
+
+      // 3. Redimensionamento proporcional
+      if (width > height) {
+        if (width > maxDimension) {
+          height = Math.round((height * maxDimension) / width);
+          width = maxDimension;
+        }
+      } else {
+        if (height > maxDimension) {
+          width = Math.round((width * maxDimension) / height);
+          height = maxDimension;
+        }
+      }
+
+      // 4. Renderização e corte no Canvas
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+
+      ctx.clearRect(0, 0, width, height);
+      ctx.drawImage(imgSource, 0, 0, width, height);
+
+      // Fecha a referência do Bitmap para liberar RAM no mobile
+      if (imgSource.close) {
+        imgSource.close();
+      }
+
+      // Retorna a string Base64 limpa
+      const dataUrl = canvas.toDataURL('image/jpeg', quality);
+      return dataUrl.split(',')[1];
     }
 
     /* ==========================================================================
