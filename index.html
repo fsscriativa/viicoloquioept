@@ -12,7 +12,7 @@
 
   <style>
     /* ==========================================================================
-       RESET & BASE (PROPORÇÃO 16:9 E DARK THEME)
+       RESET & BASE (PALETA NEON / CYBERPUNK - ALLVISION STYLE)
        ========================================================================== */
     * {
       box-sizing: border-box;
@@ -22,8 +22,11 @@
 
     body {
       font-family: 'Inter', sans-serif;
-      background-color: #0d1117;
-      color: #f0f6fc;
+      background-color: #05050a;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(255, 0, 127, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(0, 210, 255, 0.12) 0%, transparent 40%);
+      color: #ffffff;
       height: 100vh;
       width: 100vw;
       overflow: hidden;
@@ -35,23 +38,25 @@
 
     /* HEADER */
     header {
-      background: #161b22;
-      border: 1px solid #30363d;
+      background: rgba(13, 16, 26, 0.85);
+      border: 1px solid rgba(255, 0, 127, 0.3);
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 0 20px rgba(255, 0, 127, 0.2), inset 0 0 15px rgba(0, 210, 255, 0.1);
+      backdrop-filter: blur(10px);
     }
 
     header h1 {
       font-size: 2.2rem;
       font-weight: 800;
-      letter-spacing: 1px;
-      background: linear-gradient(90deg, #58a6ff, #bc8cff);
+      letter-spacing: 1.5px;
+      background: linear-gradient(90deg, #ff007f 0%, #7928ca 50%, #00d2ff 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       text-transform: uppercase;
+      text-shadow: 0 0 30px rgba(255, 0, 127, 0.3);
     }
 
     /* MAIN CONTAINER (GRID DE 3 COLUNAS) */
@@ -64,13 +69,21 @@
     }
 
     .card {
-      background: #161b22;
-      border: 1px solid #30363d;
+      background: rgba(13, 16, 26, 0.75);
+      border: 1px solid rgba(0, 210, 255, 0.25);
       border-radius: 12px;
       padding: 20px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      border-color: rgba(255, 0, 127, 0.5);
+      box-shadow: 0 0 20px rgba(255, 0, 127, 0.25);
     }
 
     .card-header {
@@ -80,8 +93,9 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid #30363d;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       padding-bottom: 8px;
+      color: #ffffff;
     }
 
     .card-title {
@@ -92,19 +106,22 @@
 
     /* BOTÃO DE ATIVAÇÃO DE ÁUDIO DO NAVEGADOR */
     .btn-audio {
-      background: #238636;
+      background: linear-gradient(135deg, #ff007f 0%, #7928ca 100%);
       color: #ffffff;
       border: none;
-      padding: 4px 10px;
-      border-radius: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
       font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s;
+      box-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
+      transition: all 0.3s ease;
     }
 
     .btn-audio:hover {
-      background: #2ea043;
+      background: linear-gradient(135deg, #7928ca 0%, #00d2ff 100%);
+      box-shadow: 0 0 15px rgba(0, 210, 255, 0.6);
+      transform: translateY(-1px);
     }
 
     /* COLUNA 1: PLAYLIST YOUTUBE */
@@ -116,6 +133,8 @@
       overflow: hidden;
       margin-bottom: 12px;
       position: relative;
+      border: 1px solid rgba(0, 210, 255, 0.3);
+      box-shadow: 0 0 15px rgba(0, 210, 255, 0.15);
     }
 
     #player {
@@ -129,7 +148,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: #161b22;
+      background: rgba(13, 16, 26, 0.95);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -146,12 +165,13 @@
     }
 
     .proximas-list li {
-      background: #21262d;
+      background: rgba(255, 255, 255, 0.05);
       padding: 8px 12px;
       border-radius: 6px;
       margin-bottom: 6px;
       font-size: 0.9rem;
-      color: #8b949e;
+      color: #a1a1aa;
+      border-left: 3px solid #00d2ff;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -166,9 +186,10 @@
       align-items: center;
       justify-content: center;
       position: relative;
-      background: #0d1117;
+      background: #000000;
       border-radius: 8px;
       overflow: hidden;
+      border: 1px solid rgba(255, 0, 127, 0.3);
     }
 
     .foto-frame img {
@@ -182,15 +203,16 @@
       position: absolute;
       bottom: 0;
       width: 100%;
-      background: rgba(22, 27, 34, 0.9);
+      background: rgba(13, 16, 26, 0.85);
       padding: 12px;
       text-align: center;
-      backdrop-filter: blur(4px);
+      backdrop-filter: blur(6px);
+      border-top: 1px solid rgba(255, 0, 127, 0.4);
     }
 
     .foto-caption .nome {
       font-weight: 600;
-      color: #58a6ff;
+      color: #00d2ff;
     }
 
     /* COLUNA 3: O QUE VOCÊ ESTÁ PESQUISANDO? */
@@ -202,35 +224,44 @@
     }
 
     .pesquisa-item {
-      background: #21262d;
-      border-left: 4px solid #bc8cff;
+      background: rgba(255, 255, 255, 0.04);
+      border-left: 4px solid #ff007f;
       padding: 12px;
       border-radius: 0 8px 8px 0;
       animation: fadeIn 0.5s ease-in-out;
+      box-shadow: inset 0 0 10px rgba(255, 0, 127, 0.05);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .pesquisa-item:hover {
+      transform: translateX(4px);
+      border-left-color: #00d2ff;
     }
 
     .pesquisa-item .autor {
       font-size: 0.85rem;
       font-weight: 600;
-      color: #7ee787;
+      color: #00d2ff;
       margin-bottom: 4px;
     }
 
     .pesquisa-item .texto {
       font-size: 0.95rem;
       line-height: 1.4;
-      color: #c9d1d9;
+      color: #e4e4e7;
     }
 
     /* FOOTER (CHAMADA E QR CODE) */
     footer {
-      background: #161b22;
-      border: 1px solid #30363d;
+      background: rgba(13, 16, 26, 0.85);
+      border: 1px solid rgba(0, 210, 255, 0.3);
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 12px 32px;
+      box-shadow: 0 0 20px rgba(0, 210, 255, 0.15);
+      backdrop-filter: blur(10px);
     }
 
     .cta-text {
@@ -241,11 +272,14 @@
 
     .cta-text h2 {
       font-size: 1.5rem;
-      color: #f0f6fc;
+      background: linear-gradient(90deg, #ff007f, #00d2ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 800;
     }
 
     .cta-text p {
-      color: #8b949e;
+      color: #a1a1aa;
       font-size: 1.1rem;
     }
 
@@ -256,6 +290,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 0 15px rgba(255, 0, 127, 0.5);
+      border: 2px solid #00d2ff;
     }
 
     .qrcode-box img {
@@ -290,11 +326,11 @@
       <div id="player-container">
         <div id="player"></div>
         <div id="player-error-overlay" class="player-overlay-error" style="display: none;">
-          <h3 style="color: #f85149; font-size: 1.1rem; margin-bottom: 6px;">⚠️ Carregando música...</h3>
-          <p style="font-size: 0.85rem; color: #8b949e;">Ajustando reprodução no telão.</p>
+          <h3 style="color: #ff007f; font-size: 1.1rem; margin-bottom: 6px;">⚠️ Carregando música...</h3>
+          <p style="font-size: 0.85rem; color: #a1a1aa;">Ajustando reprodução no telão.</p>
         </div>
       </div>
-      <span style="font-size: 0.8rem; color: #8b949e; margin-bottom: 4px;">PRÓXIMAS MÚSICAS:</span>
+      <span style="font-size: 0.8rem; color: #00d2ff; margin-bottom: 4px; font-weight: 600;">PRÓXIMAS MÚSICAS:</span>
       <ul class="proximas-list" id="proximas-list">
         <li>Aguardando envios...</li>
       </ul>
@@ -311,7 +347,7 @@
         <img id="foto-exibida" src="" alt="Mural de Fotos" style="opacity: 0;">
         <div class="foto-caption" id="foto-caption" style="display: none;">
           <span class="nome" id="foto-nome"></span>
-          <p id="foto-mensagem" style="font-size: 0.85rem; color: #c9d1d9;"></p>
+          <p id="foto-mensagem" style="font-size: 0.85rem; color: #e4e4e7;"></p>
         </div>
       </div>
     </section>
@@ -413,7 +449,7 @@
         ytPlayer.setVolume(100);
         somAtivado = true;
         document.getElementById('btn-ativar-som').innerText = '🔊 Som Ativado';
-        document.getElementById('btn-ativar-som').style.background = '#1f6feb';
+        document.getElementById('btn-ativar-som').style.background = 'linear-gradient(135deg, #00d2ff 0%, #7928ca 100%)';
       }
     }
 
@@ -481,7 +517,7 @@
           listEl.appendChild(li);
         });
       } else {
-        listEl.innerHTML = '<li>Nenhuma música na fila</li>';
+        listEl.innerHTML = '<li style="border-left-color: #ff007f;">Nenhuma música na fila</li>';
       }
     }
 
@@ -578,7 +614,7 @@
       container.innerHTML = '';
 
       if (!pesquisas || pesquisas.length === 0) {
-        container.innerHTML = '<p style="color:#8b949e">Nenhuma pesquisa enviada ainda.</p>';
+        container.innerHTML = '<p style="color:#a1a1aa">Nenhuma pesquisa enviada ainda.</p>';
         return;
       }
 
