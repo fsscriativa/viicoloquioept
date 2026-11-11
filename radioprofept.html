@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meu Player de Música - Google Drive</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .player-card {
+      background: rgba(30, 41, 59, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 28px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+
+    .disc-icon {
+      width: 130px;
+      height: 130px;
+      margin: 0 auto 24px;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, #06b6d4, #3b82f6, #8b5cf6, #06b6d4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 25px rgba(6, 182, 212, 0.35);
+      animation: spin 10s linear infinite;
+      animation-play-state: paused;
+    }
+
+    .disc-icon.playing {
+      animation-play-state: running;
+    }
+
+    .disc-icon::after {
+      content: '';
+      width: 36px;
+      height: 36px;
+      background: #0f172a;
+      border: 4px solid #1e293b;
+      border-radius: 50%;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    .song-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #f1f5f9;
+    }
+
+    .status-text {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-bottom: 20px;
+    }
+
+    audio {
+      width: 100%;
+      outline: none;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    .playlist-container {
+      max-height: 200px;
+      overflow-y: auto;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 16px;
+      text-align: left;
+    }
+
+    .playlist-container::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .playlist-container::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+
+    .playlist-item {
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      cursor: pointer;
+      color: #cbd5e1;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 4px;
+    }
+
+    .playlist-item:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: #fff;
+    }
+
+    .playlist-item.active {
+      background: rgba(6, 182, 212, 0.18);
+      color: #38bdf8;
+      font-weight: 600;
+      border-left: 3px solid #38bdf8;
+    }
+
+    .autoplay-banner {
+      display: none;
+      background: linear-gradient(90deg, #f59e0b, #d97706);
+      color: #0f172a;
+      font-weight: 700;
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 18px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+      transition: transform 0.2s ease;
+    }
+
+    .autoplay-banner:hover {
+      transform: scale(1.02);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="player-card">
+    <div id="autoplayBanner" class="autoplay-banner" onclick="startPlay()">
+      ▶ Clique para ativar a reprodução automática
+    </div>
+
+    <div class="disc-icon" id="discIcon"></div>
+    <div class="song-title" id="songTitle">Buscando músicas...</div>
+    <div class="status-text" id="statusText">Conectando ao Google Drive...</div>
+
+    <audio id="audioPlayer" controls autoplay></audio>
+
+    <div class="playlist-container" id="playlistContainer"></div>
+  </div>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyEQ7LnM-WrHMcAvY754g4wRRQrbu25Fu5apbvmV9OciHCSvqjHcfm6Afy5oJdY9m7_cA/exec';
+
+    let playlist = [];
+    let currentIndex = 0;
+
+    const audioPlayer = document.getElementById('audioPlayer');
+    const songTitle = document.getElementById('songTitle');
+    const statusText = document.getElementById('statusText');
+    const playlistContainer = document.getElementById('playlistContainer');
+    const discIcon = document.getElementById('discIcon');
+    const autoplayBanner = document.getElementById('autoplayBanner');
+
+    async function loadPlaylist() {
+      try {
+        const response = await fetch(API_URL);
+        playlist = await response.json();
+
+        if (!Array.isArray(playlist) || playlist.length === 0) {
+          songTitle.textContent = 'Nenhuma música encontrada';
+          statusText.textContent = 'Verifique se há arquivos de áudio na pasta.';
+          return;
+        }
+
+        renderPlaylist();
+        loadTrack(0);
+      } catch (error) {
+        songTitle.textContent = 'Erro de conexão';
+        statusText.textContent = 'Não foi possível carregar a lista do Apps Script.';
+        console.error(error);
+      }
+    }
+
+    function renderPlaylist() {
+      playlistContainer.innerHTML = '';
+      playlist.forEach((track, index) => {
+        const item = document.createElement('div');
+        item.className = `playlist-item ${index === currentIndex ? 'active' : ''}`;
+        item.textContent = `${index + 1}. ${track.title}`;
+        item.onclick = () => loadTrack(index, true);
+        playlistContainer.appendChild(item);
+      });
+    }
+
+    function loadTrack(index, userInteracted = false) {
+      if (index < 0 || index >= playlist.length) return;
+      
+      currentIndex = index;
+      const track = playlist[currentIndex];
+      
+      songTitle.textContent = track.title;
+      statusText.textContent = `Faixa ${currentIndex + 1} de ${playlist.length}`;
+      audioPlayer.src = track.url;
+
+      renderPlaylist();
+
+      const playPromise = audioPlayer.play();
+
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          autoplayBanner.style.display = 'none';
+        }).catch(() => {
+          autoplayBanner.style.display = 'block';
+        });
+      }
+    }
+
+    function startPlay() {
+      audioPlayer.play();
+      autoplayBanner.style.display = 'none';
+    }
+
+    audioPlayer.onended = () => {
+      let nextIndex = currentIndex + 1;
+      if (nextIndex >= playlist.length) nextIndex = 0;
+      loadTrack(nextIndex, true);
+    };
+
+    audioPlayer.onplay = () => discIcon.classList.add('playing');
+    audioPlayer.onpause = () => discIcon.classList.remove('playing');
+
+    window.onload = loadPlaylist;
+  </script>
+</body>
+</html>
