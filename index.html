@@ -3,640 +3,251 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VII Colóquio de Pesquisas em EPT — Painel Principal</title>
-  
-  <!-- Estilos e Fontes -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-
+  <title>RÁDIO EPT</title>
   <style>
-    /* ==========================================================================
-       RESET & BASE (PALETA NEON / CYBERPUNK - ALLVISION STYLE)
-       ========================================================================== */
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
     body {
-      font-family: 'Inter', sans-serif;
-      background-color: #05050a;
-      background-image: 
-        radial-gradient(circle at 10% 20%, rgba(255, 0, 127, 0.12) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(0, 210, 255, 0.12) 0%, transparent 40%);
-      color: #ffffff;
-      height: 100vh;
-      width: 100vw;
-      overflow: hidden;
-      display: grid;
-      grid-template-rows: 80px 1fr 120px;
-      gap: 16px;
-      padding: 16px;
-    }
-
-    /* HEADER */
-    header {
-      background: rgba(13, 16, 26, 0.85);
-      border: 1px solid rgba(255, 0, 127, 0.3);
-      border-radius: 12px;
+      background: linear-gradient(135deg, #215912, #0f2c08);
+      color: #F2F2F2;
+      min-height: 100vh;
       display: flex;
-      align-items: center;
+      flex-direction: column;
       justify-content: center;
-      box-shadow: 0 0 20px rgba(255, 0, 127, 0.2), inset 0 0 15px rgba(0, 210, 255, 0.1);
-      backdrop-filter: blur(10px);
+      align-items: center;
+      padding: 20px;
     }
 
-    header h1 {
-      font-size: 2.2rem;
+    .radio-header {
+      font-size: 2rem;
       font-weight: 800;
-      letter-spacing: 1.5px;
-      background: linear-gradient(90deg, #ff007f 0%, #7928ca 50%, #00d2ff 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-transform: uppercase;
-      text-shadow: 0 0 30px rgba(255, 0, 127, 0.3);
+      letter-spacing: 2px;
+      color: #F2F2F2;
+      margin-bottom: 24px;
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      text-align: center;
     }
 
-    /* MAIN CONTAINER (GRID DE 3 COLUNAS) */
-    main {
-      display: grid;
-      grid-template-columns: 1fr 1.2fr 1fr;
-      gap: 16px;
-      height: 100%;
-      min-height: 0;
-    }
-
-    .card {
-      background: rgba(13, 16, 26, 0.75);
-      border: 1px solid rgba(0, 210, 255, 0.25);
-      border-radius: 12px;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(8px);
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .card:hover {
-      border-color: rgba(255, 0, 127, 0.5);
-      box-shadow: 0 0 20px rgba(255, 0, 127, 0.25);
-    }
-
-    .card-header {
-      font-size: 1.2rem;
-      font-weight: 600;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding-bottom: 8px;
-      color: #ffffff;
-    }
-
-    .card-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    /* BOTÃO DE ATIVAÇÃO DE ÁUDIO DO NAVEGADOR */
-    .btn-audio {
-      background: linear-gradient(135deg, #ff007f 0%, #7928ca 100%);
-      color: #ffffff;
-      border: none;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
-      transition: all 0.3s ease;
-    }
-
-    .btn-audio:hover {
-      background: linear-gradient(135deg, #7928ca 0%, #00d2ff 100%);
-      box-shadow: 0 0 15px rgba(0, 210, 255, 0.6);
-      transform: translateY(-1px);
-    }
-
-    /* COLUNA 1: PLAYLIST YOUTUBE */
-    #player-container {
+    .player-card {
+      background: rgba(33, 89, 18, 0.35);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(70, 191, 36, 0.25);
+      border-radius: 24px;
+      padding: 28px;
       width: 100%;
-      aspect-ratio: 16 / 9;
-      background: #000;
-      border-radius: 8px;
-      overflow: hidden;
-      margin-bottom: 12px;
-      position: relative;
-      border: 1px solid rgba(0, 210, 255, 0.3);
-      box-shadow: 0 0 15px rgba(0, 210, 255, 0.15);
+      max-width: 440px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      text-align: center;
     }
 
-    #player {
-      width: 100%;
-      height: 100%;
-    }
-
-    .player-overlay-error {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(13, 16, 26, 0.95);
+    .disc-icon {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, #46BF24, #348C1C, #2B7317, #215912, #46BF24);
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px;
-      text-align: center;
-      z-index: 10;
+      box-shadow: 0 0 30px rgba(70, 191, 36, 0.4);
+      animation: spin 10s linear infinite;
+      animation-play-state: paused;
     }
 
-    .proximas-list {
-      list-style: none;
-      margin-top: 8px;
-      overflow-y: auto;
+    .disc-icon.playing {
+      animation-play-state: running;
     }
 
-    .proximas-list li {
-      background: rgba(255, 255, 255, 0.05);
-      padding: 8px 12px;
-      border-radius: 6px;
+    .disc-icon::after {
+      content: '';
+      width: 36px;
+      height: 36px;
+      background: #14350b;
+      border: 4px solid #2B7317;
+      border-radius: 50%;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    .song-title {
+      font-size: 1.15rem;
+      font-weight: 600;
       margin-bottom: 6px;
-      font-size: 0.9rem;
-      color: #a1a1aa;
-      border-left: 3px solid #00d2ff;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      color: #F2F2F2;
     }
 
-    /* COLUNA 2: MURAL DE FOTOS */
-    .foto-frame {
-      flex: 1;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      background: #000000;
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid rgba(255, 0, 127, 0.3);
-    }
-
-    .foto-frame img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-      transition: opacity 0.5s ease-in-out;
-    }
-
-    .foto-caption {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      background: rgba(13, 16, 26, 0.85);
-      padding: 12px;
-      text-align: center;
-      backdrop-filter: blur(6px);
-      border-top: 1px solid rgba(255, 0, 127, 0.4);
-    }
-
-    .foto-caption .nome {
-      font-weight: 600;
-      color: #00d2ff;
-    }
-
-    /* COLUNA 3: O QUE VOCÊ ESTÁ PESQUISANDO? */
-    .pesquisas-container {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      overflow-y: auto;
-    }
-
-    .pesquisa-item {
-      background: rgba(255, 255, 255, 0.04);
-      border-left: 4px solid #ff007f;
-      padding: 12px;
-      border-radius: 0 8px 8px 0;
-      animation: fadeIn 0.5s ease-in-out;
-      box-shadow: inset 0 0 10px rgba(255, 0, 127, 0.05);
-      transition: transform 0.2s ease, border-color 0.2s ease;
-    }
-
-    .pesquisa-item:hover {
-      transform: translateX(4px);
-      border-left-color: #00d2ff;
-    }
-
-    .pesquisa-item .autor {
+    .status-text {
       font-size: 0.85rem;
-      font-weight: 600;
-      color: #00d2ff;
-      margin-bottom: 4px;
+      color: #c8e6c9;
+      margin-bottom: 16px;
     }
 
-    .pesquisa-item .texto {
-      font-size: 0.95rem;
-      line-height: 1.4;
-      color: #e4e4e7;
-    }
-
-    /* FOOTER (CHAMADA E QR CODE) */
-    footer {
-      background: rgba(13, 16, 26, 0.85);
-      border: 1px solid rgba(0, 210, 255, 0.3);
+    audio {
+      width: 100%;
+      outline: none;
       border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 32px;
-      box-shadow: 0 0 20px rgba(0, 210, 255, 0.15);
-      backdrop-filter: blur(10px);
+      margin-bottom: 20px;
+      accent-color: #46BF24;
     }
 
-    .cta-text {
-      display: flex;
-      align-items: center;
-      gap: 16px;
+    .playlist-container {
+      max-height: 220px;
+      overflow-y: auto;
+      border-top: 1px solid rgba(242, 242, 242, 0.15);
+      padding-top: 16px;
+      text-align: left;
     }
 
-    .cta-text h2 {
-      font-size: 1.5rem;
-      background: linear-gradient(90deg, #ff007f, #00d2ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      font-weight: 800;
+    .playlist-container::-webkit-scrollbar {
+      width: 6px;
     }
 
-    .cta-text p {
-      color: #a1a1aa;
-      font-size: 1.1rem;
+    .playlist-container::-webkit-scrollbar-thumb {
+      background: rgba(70, 191, 36, 0.3);
+      border-radius: 4px;
     }
 
-    .qrcode-box {
-      background: #ffffff;
-      padding: 6px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 15px rgba(255, 0, 127, 0.5);
-      border: 2px solid #00d2ff;
+    .playlist-item {
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      cursor: pointer;
+      color: #d1e7dd;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 6px;
+      background: rgba(33, 89, 18, 0.2);
+      border: 1px solid rgba(70, 191, 36, 0.1);
     }
 
-    .qrcode-box img {
-      width: 80px;
-      height: 80px;
+    .playlist-item:hover {
+      background: rgba(52, 140, 28, 0.4);
+      color: #F2F2F2;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+    .playlist-item.active {
+      background: rgba(70, 191, 36, 0.25);
+      color: #46BF24;
+      font-weight: 600;
+      border-color: rgba(70, 191, 36, 0.5);
     }
   </style>
 </head>
 <body>
 
-  <!-- HEADER -->
-  <header>
-    <h1>VII Colóquio de Pesquisas em EPT</h1>
-  </header>
+  <div class="radio-header">RÁDIO EPT</div>
 
-  <!-- CONTEÚDO PRINCIPAL (16:9 3 COLUNAS) -->
-  <main>
-    
-    <!-- COLUNA 1: PLAYLIST -->
-    <section class="card">
-      <div class="card-header">
-        <div class="card-title">
-          <span>🎵</span> Playlist Colaborativa
-        </div>
-        <button id="btn-ativar-som" class="btn-audio" onclick="ativarSomTelao()">🔊 Ativar Som</button>
-      </div>
-      <div id="player-container">
-        <div id="player"></div>
-        <div id="player-error-overlay" class="player-overlay-error" style="display: none;">
-          <h3 style="color: #ff007f; font-size: 1.1rem; margin-bottom: 6px;">⚠️ Carregando música...</h3>
-          <p style="font-size: 0.85rem; color: #a1a1aa;">Ajustando reprodução no telão.</p>
-        </div>
-      </div>
-      <span style="font-size: 0.8rem; color: #00d2ff; margin-bottom: 4px; font-weight: 600;">PRÓXIMAS MÚSICAS:</span>
-      <ul class="proximas-list" id="proximas-list">
-        <li>Aguardando envios...</li>
-      </ul>
-    </section>
+  <div class="player-card">
+    <div class="disc-icon" id="discIcon"></div>
+    <div class="song-title" id="songTitle">Buscando músicas...</div>
+    <div class="status-text" id="statusText">Lendo a pasta automaticamente</div>
 
-    <!-- COLUNA 2: MURAL DE FOTOS -->
-    <section class="card">
-      <div class="card-header">
-        <div class="card-title">
-          <span>📸</span> Mural do Evento
-        </div>
-      </div>
-      <div class="foto-frame">
-        <img id="foto-exibida" src="" alt="Mural de Fotos" style="opacity: 0;">
-        <div class="foto-caption" id="foto-caption" style="display: none;">
-          <span class="nome" id="foto-nome"></span>
-          <p id="foto-mensagem" style="font-size: 0.85rem; color: #e4e4e7;"></p>
-        </div>
-      </div>
-    </section>
+    <audio id="audioPlayer" controls></audio>
 
-    <!-- COLUNA 3: O QUE VOCÊ ESTÁ PESQUISANDO? -->
-    <section class="card">
-      <div class="card-header">
-        <div class="card-title">
-          <span>🔬</span> O que você está pesquisando?
-        </div>
-      </div>
-      <div class="pesquisas-container" id="pesquisas-container">
-        <!-- Inserido dinamicamente via JS -->
-      </div>
-    </section>
-
-  </main>
-
-  <!-- FOOTER -->
-  <footer>
-    <div class="cta-text">
-      <h2>📱 PARTICIPE DO NOSSO EVENTO</h2>
-      <p>Aponte a câmera do seu celular para o QR Code ao lado e envie suas músicas, fotos e pesquisas!</p>
-    </div>
-    <div class="qrcode-box">
-      <img id="qrcode-img" src="" alt="QR Code para Participar">
-    </div>
-  </footer>
-
-  <!-- SCRIPT DO YOUTUBE IFRAME API -->
-  <script src="https://www.youtube.com/iframe_api"></script>
+    <div class="playlist-container" id="playlistContainer"></div>
+  </div>
 
   <script>
-    /* ==========================================================================
-       CONFIGURAÇÕES E ESTADO DA APLICAÇÃO
-       ========================================================================== */
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwyVME1Q6nlICmyJg-mTiPxIn987m1OCXL7H_CiXal19vNpKUXSv1rolldCE5ydj27D/exec';
-    
-    const PARTICIPAR_URL = window.location.href.replace('index.html', '') + 'participar.html';
+    const GITHUB_USER = 'fsscriativa';
+    const GITHUB_REPO = 'viicoloquioept';
+    const FOLDER_NAME = 'musicas';
 
-    let ytPlayer = null;
-    let videoAtualId = null;
-    let filaLocal = []; // Gerenciamento local da playlist
-    let idsProcessados = new Set(); // Evita duplicações
-    
-    let fotosLista = [];
-    let fotoIndexAtual = 0;
-    let fotoTimer = null;
-    let somAtivado = false;
+    let playlist = [];
+    let currentIndex = 0;
 
-    // Gerar QR Code do Footer automaticamente
-    document.getElementById('qrcode-img').src = 
-      `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(PARTICIPAR_URL)}`;
+    const audioPlayer = document.getElementById('audioPlayer');
+    const songTitle = document.getElementById('songTitle');
+    const statusText = document.getElementById('statusText');
+    const playlistContainer = document.getElementById('playlistContainer');
+    const discIcon = document.getElementById('discIcon');
 
-    /* ==========================================================================
-       UTILITÁRIO: SANITIZADOR DE ID DO YOUTUBE
-       ========================================================================== */
-    function obterYouTubeId(urlOuId) {
-      if (!urlOuId) return null;
-      if (urlOuId.length === 11 && !urlOuId.includes('/') && !urlOuId.includes('.')) {
-        return urlOuId;
-      }
-      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
-      const match = urlOuId.match(regExp);
-      return (match && match[2].length === 11) ? match[2] : null;
-    }
-
-    /* ==========================================================================
-       YOUTUBE PLAYER ENGINE AJUSTADO
-       ========================================================================== */
-    function onYouTubeIframeAPIReady() {
-      ytPlayer = new YT.Player('player', {
-        height: '100%',
-        width: '100%',
-        host: 'https://www.youtube-nocookie.com',
-        playerVars: {
-          'autoplay': 1,
-          'mute': 1, // Mudo no início para evitar erro de bloqueio do navegador
-          'controls': 1,
-          'rel': 0,
-          'enablejsapi': 1,
-          'origin': window.location.origin
-        },
-        events: {
-          'onReady': onPlayerReady,
-          'onStateChange': onPlayerStateChange,
-          'onError': onPlayerError
-        }
-      });
-    }
-
-    function onPlayerReady(event) {
-      carregarDados();
-    }
-
-    function ativarSomTelao() {
-      if (ytPlayer && typeof ytPlayer.unMute === 'function') {
-        ytPlayer.unMute();
-        ytPlayer.setVolume(100);
-        somAtivado = true;
-        document.getElementById('btn-ativar-som').innerText = '🔊 Som Ativado';
-        document.getElementById('btn-ativar-som').style.background = 'linear-gradient(135deg, #00d2ff 0%, #7928ca 100%)';
-      }
-    }
-
-    function onPlayerStateChange(event) {
-      // Quando o vídeo termina (YT.PlayerState.ENDED = 0)
-      if (event.data === YT.PlayerState.ENDED) {
-        tocarProximaLocal();
-      }
-    }
-
-    function onPlayerError(event) {
-      console.warn("Erro ao reproduzir o vídeo no YouTube (Código: " + event.data + "). Pulando para o próximo...");
-      document.getElementById('player-error-overlay').style.display = 'flex';
-      
-      // Pula para a próxima música em caso de erro no vídeo
-      setTimeout(() => {
-        tocarProximaLocal();
-      }, 2000);
-    }
-
-    /* ==========================================================================
-       GERENCIADOR LOCAL DA PLAYLIST (OPÇÃO A)
-       ========================================================================== */
-    function tocarProximaLocal() {
-      // Se não houver músicas na fila local, tenta re-sincronizar
-      if (filaLocal.length === 0) {
-        videoAtualId = null;
-        renderizarFilaUI();
-        carregarDados();
-        return;
-      }
-
-      // Remove a próxima música da fila local
-      const proximaMusica = filaLocal.shift();
-      const ytId = obterYouTubeId(proximaMusica.YOUTUBE_ID || proximaMusica.URL || proximaMusica.youtubeUrl);
-
-      if (ytId && ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
-        videoAtualId = ytId;
-        document.getElementById('player-error-overlay').style.display = 'none';
-
-        ytPlayer.loadVideoById({
-          videoId: videoAtualId,
-          startSeconds: 0
-        });
-
-        if (somAtivado) {
-          ytPlayer.unMute();
-        }
-      } else {
-        // Se a URL/ID for inválido, tenta a seguinte
-        tocarProximaLocal();
-      }
-
-      renderizarFilaUI();
-    }
-
-    function renderizarFilaUI() {
-      const listEl = document.getElementById('proximas-list');
-      listEl.innerHTML = '';
-
-      if (filaLocal.length > 0) {
-        filaLocal.forEach(item => {
-          const li = document.createElement('li');
-          li.innerText = `• ${item.NOME || item.nome || 'Música enviada'}`;
-          listEl.appendChild(li);
-        });
-      } else {
-        listEl.innerHTML = '<li style="border-left-color: #ff007f;">Nenhuma música na fila</li>';
-      }
-    }
-
-    /* ==========================================================================
-       CARROSSEL DE FOTOS ENGINE
-       ========================================================================== */
-    function iniciarCarrosselFotos(novasFotos) {
-      if (!novasFotos || novasFotos.length === 0) return;
-      
-      fotosLista = novasFotos;
-      
-      if (!fotoTimer) {
-        exibirFotoAtual();
-        fotoTimer = setInterval(() => {
-          fotoIndexAtual = (fotoIndexAtual + 1) % fotosLista.length;
-          exibirFotoAtual();
-        }, 10000); // 10 Segundos por foto
-      }
-    }
-
-    function exibirFotoAtual() {
-      if (fotosLista.length === 0) return;
-      
-      const foto = fotosLista[fotoIndexAtual];
-      const imgElement = document.getElementById('foto-exibida');
-      const captionElement = document.getElementById('foto-caption');
-      
-      imgElement.style.opacity = '0';
-      
-      setTimeout(() => {
-        imgElement.src = foto.driveUrl;
-        document.getElementById('foto-nome').innerText = foto.nome;
-        document.getElementById('foto-mensagem').innerText = foto.mensagem || '';
-        
-        captionElement.style.display = 'block';
-        imgElement.style.opacity = '1';
-      }, 500);
-    }
-
-    /* ==========================================================================
-       COMUNICAÇÃO COM O BACKEND (POLLING A CADA 5s)
-       ========================================================================== */
-    async function carregarDados() {
+    async function fetchGitHubFolder() {
       try {
-        const response = await fetch(`${API_URL}?action=getPainelData`);
-        const json = await response.json();
+        const apiUrl = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${FOLDER_NAME}`;
+        const response = await fetch(apiUrl);
+        const files = await response.json();
 
-        if (json.status === 'success') {
-          processarMusicasRecebidas(json.data.musica);
-          iniciarCarrosselFotos(json.data.fotos);
-          atualizarPesquisas(json.data.pesquisas);
+        if (!Array.isArray(files)) {
+          throw new Error('A resposta da API do GitHub não retornou uma lista.');
         }
-      } catch (err) {
-        console.error("Erro ao buscar dados do Painel:", err);
+
+        playlist = files
+          .filter(file => file.name.toLowerCase().endsWith('.mp3'))
+          .map(file => ({
+            title: file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " "),
+            url: file.download_url
+          }));
+
+        if (playlist.length === 0) {
+          songTitle.textContent = 'Pasta vazia';
+          statusText.textContent = 'Nenhum arquivo .mp3 encontrado na pasta /musicas.';
+          return;
+        }
+
+        renderPlaylist();
+        setTrack(0, false);
+        statusText.textContent = `${playlist.length} músicas carregadas automaticamente.`;
+      } catch (error) {
+        songTitle.textContent = 'Erro ao ler pasta';
+        statusText.textContent = 'Verifique se a pasta "musicas" existe na raiz.';
+        console.error(error);
       }
     }
 
-    function processarMusicasRecebidas(musicaData) {
-      if (!musicaData) return;
-
-      const todasDaApi = [];
-      if (musicaData.atual) todasDaApi.push(musicaData.atual);
-      if (musicaData.proximas && Array.isArray(musicaData.proximas)) {
-        todasDaApi.push(...musicaData.proximas);
-      }
-
-      // Adiciona novas faixas da API à fila local (sem duplicar)
-      todasDaApi.forEach(m => {
-        const idUnico = m.ID || m.YOUTUBE_ID || m.youtubeUrl;
-        if (idUnico && !idsProcessados.has(idUnico)) {
-          idsProcessados.add(idUnico);
-          
-          // Se não há nenhum vídeo tocando no momento, toca esse imediatamente
-          if (!videoAtualId && filaLocal.length === 0) {
-            const ytId = obterYouTubeId(m.YOUTUBE_ID || m.URL || m.youtubeUrl);
-            if (ytId && ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
-              videoAtualId = ytId;
-              document.getElementById('player-error-overlay').style.display = 'none';
-              ytPlayer.loadVideoById({ videoId: videoAtualId, startSeconds: 0 });
-              if (somAtivado) ytPlayer.unMute();
-            }
-          } else {
-            // Caso contrário, enfileira
-            filaLocal.push(m);
-          }
-        }
-      });
-
-      renderizarFilaUI();
-    }
-
-    function atualizarPesquisas(pesquisas) {
-      const container = document.getElementById('pesquisas-container');
-      container.innerHTML = '';
-
-      if (!pesquisas || pesquisas.length === 0) {
-        container.innerHTML = '<p style="color:#a1a1aa">Nenhuma pesquisa enviada ainda.</p>';
-        return;
-      }
-
-      // Renderiza as 5 últimas pesquisas aprovadas
-      pesquisas.forEach(p => {
-        const card = document.createElement('div');
-        card.className = 'pesquisa-item';
-        card.innerHTML = `
-          <div class="autor">${escapeHtml(p.NOME)}</div>
-          <div class="texto">"${escapeHtml(p.PESQUISA)}"</div>
-        `;
-        container.appendChild(card);
+    function renderPlaylist() {
+      playlistContainer.innerHTML = '';
+      playlist.forEach((track, index) => {
+        const item = document.createElement('div');
+        item.className = `playlist-item ${index === currentIndex ? 'active' : ''}`;
+        item.textContent = `${index + 1}. ${track.title}`;
+        item.onclick = () => setTrack(index, true);
+        playlistContainer.appendChild(item);
       });
     }
 
-    function escapeHtml(text) {
-      return text ? text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+    function setTrack(index, autoPlay = false) {
+      if (index < 0 || index >= playlist.length) return;
+      
+      currentIndex = index;
+      const track = playlist[currentIndex];
+      
+      songTitle.textContent = track.title;
+      statusText.textContent = `Faixa ${currentIndex + 1} de ${playlist.length}`;
+      audioPlayer.src = track.url;
+      audioPlayer.load();
+
+      renderPlaylist();
+
+      if (autoPlay) {
+        audioPlayer.play().catch(err => {
+          console.warn("Autoplay bloqueado pelo navegador:", err);
+          statusText.textContent = 'Clique no play do player para iniciar.';
+        });
+      }
     }
 
-    // Inicialização do Polling (a cada 5 segundos)
-    setInterval(carregarDados, 5000);
+    audioPlayer.onended = () => {
+      let nextIndex = currentIndex + 1;
+      if (nextIndex >= playlist.length) nextIndex = 0;
+      setTrack(nextIndex, true);
+    };
 
+    audioPlayer.onplay = () => discIcon.classList.add('playing');
+    audioPlayer.onpause = () => discIcon.classList.remove('playing');
+
+    window.onload = fetchGitHubFolder;
   </script>
 </body>
 </html>
