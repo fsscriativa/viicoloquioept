@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Envio de Música - RÁDIO EPT</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #215912, #0f2c08);
+      color: #F2F2F2;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .radio-header {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #F2F2F2;
+      margin-bottom: 6px;
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      text-align: center;
+    }
+
+    .radio-subtitle {
+      font-size: 0.95rem;
+      color: #c8e6c9;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .upload-card {
+      background: rgba(33, 89, 18, 0.35);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(70, 191, 36, 0.25);
+      border-radius: 24px;
+      padding: 32px 28px;
+      width: 100%;
+      max-width: 460px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      text-align: center;
+    }
+
+    .drop-zone {
+      border: 2px dashed rgba(70, 191, 36, 0.5);
+      border-radius: 16px;
+      padding: 36px 20px;
+      background: rgba(33, 89, 18, 0.2);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .drop-zone:hover, .drop-zone.dragover {
+      background: rgba(52, 140, 28, 0.35);
+      border-color: #46BF24;
+      transform: translateY(-2px);
+    }
+
+    .upload-icon {
+      width: 60px;
+      height: 60px;
+      margin-bottom: 14px;
+      fill: #46BF24;
+      transition: transform 0.3s ease;
+    }
+
+    .drop-zone:hover .upload-icon {
+      transform: scale(1.1);
+    }
+
+    .drop-zone-text {
+      font-size: 0.95rem;
+      color: #d1e7dd;
+      margin-bottom: 6px;
+    }
+
+    .drop-zone-subtext {
+      font-size: 0.78rem;
+      color: #94c395;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .file-info {
+      display: none;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(70, 191, 36, 0.15);
+      border: 1px solid rgba(70, 191, 36, 0.3);
+      color: #46BF24;
+      font-size: 0.88rem;
+      font-weight: 600;
+      word-break: break-all;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, #46BF24, #2B7317);
+      color: #F2F2F2;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(70, 191, 36, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: linear-gradient(135deg, #52d62a, #348C1C);
+      box-shadow: 0 6px 20px rgba(70, 191, 36, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .progress-container {
+      display: none;
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #348C1C, #46BF24);
+      border-radius: 6px;
+      transition: width 0.3s ease;
+    }
+
+    .progress-status {
+      font-size: 0.82rem;
+      color: #c8e6c9;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .alert-success {
+      display: none;
+      margin-top: 20px;
+      padding: 14px;
+      border-radius: 12px;
+      background: rgba(70, 191, 36, 0.25);
+      border: 1px solid #46BF24;
+      color: #F2F2F2;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .nav-link {
+      display: inline-block;
+      margin-top: 22px;
+      color: #c8e6c9;
+      text-decoration: none;
+      font-size: 0.88rem;
+      transition: color 0.2s ease;
+    }
+
+    .nav-link:hover {
+      color: #46BF24;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="radio-header">RÁDIO EPT</div>
+  <div class="radio-subtitle">Envie sua música para a nossa programação</div>
+
+  <div class="upload-card">
+    <form id="uploadForm">
+      <div class="drop-zone" id="dropZone">
+        <svg class="upload-icon" viewBox="0 0 24 24">
+          <path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/>
+        </svg>
+        <div class="drop-zone-text" id="dropZoneText">Clique ou arraste seu arquivo MP3 aqui</div>
+        <div class="drop-zone-subtext">Formato aceito: .mp3</div>
+        <input type="file" id="audioInput" accept="audio/mp3, audio/mpeg">
+      </div>
+
+      <div class="file-info" id="fileInfo"></div>
+
+      <button type="submit" class="btn-submit" id="submitBtn" disabled>Enviar Música</button>
+    </form>
+
+    <div class="progress-container" id="progressContainer">
+      <div class="progress-status">
+        <span>Enviando música...</span>
+        <span id="progressPercent">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+      </div>
+    </div>
+
+    <div class="alert-success" id="alertSuccess">
+      ✓ Música enviada com sucesso para a RÁDIO EPT!
+    </div>
+
+    <a href="index.html" class="nav-link">← Voltar para o Player da Rádio</a>
+  </div>
+
+  <script>
+    const dropZone = document.getElementById('dropZone');
+    const audioInput = document.getElementById('audioInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const submitBtn = document.getElementById('submitBtn');
+    const uploadForm = document.getElementById('uploadForm');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBarFill = document.getElementById('progressBarFill');
+    const progressPercent = document.getElementById('progressPercent');
+    const alertSuccess = document.getElementById('alertSuccess');
+
+    let selectedFile = null;
+
+    // Clique na área de drop aciona o input escondido
+    dropZone.addEventListener('click', () => audioInput.click());
+
+    // Efeitos de Arrastar e Soltar
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+      });
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        handleFile(files[0]);
+      }
+    });
+
+    audioInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    function handleFile(file) {
+      if (!file.name.toLowerCase().endsWith('.mp3') && file.type !== 'audio/mpeg') {
+        alert('Por favor, selecione um arquivo válido no formato .mp3');
+        return;
+      }
+
+      selectedFile = file;
+      fileInfo.textContent = `🎵 ${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`;
+      fileInfo.style.display = 'block';
+      submitBtn.disabled = false;
+      alertSuccess.style.display = 'none';
+    }
+
+    uploadForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!selectedFile) return;
+
+      // Inicia a animação/simulação de upload
+      submitBtn.disabled = true;
+      progressContainer.style.display = 'block';
+      alertSuccess.style.display = 'none';
+
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.floor(Math.random() * 15) + 5;
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(interval);
+
+          // Sucesso
+          setTimeout(() => {
+            progressContainer.style.display = 'none';
+            alertSuccess.style.display = 'block';
+            fileInfo.style.display = 'none';
+            selectedFile = null;
+            audioInput.value = '';
+            progressBarFill.style.width = '0%';
+            progressPercent.textContent = '0%';
+          }, 400);
+        }
+
+        progressBarFill.style.width = `${progress}%`;
+        progressPercent.textContent = `${progress}%`;
+      }, 200);
+    });
+  </script>
+</body>
+</html>
