@@ -3,251 +3,1118 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RÁDIO EPT</title>
+  <title>RÁDIO EPT - Automação Broadcast</title>
   <style>
+    :root {
+      --green-bright: #46BF24;
+      --green-mid: #348C1C;
+      --green-dark: #2B7317;
+      --green-deep: #215912;
+      --bg-dark: #0d170b;
+      --panel-bg: #152412;
+      --panel-border: #2B7317;
+      --text-light: #F2F2F2;
+      --text-muted: #9eb89a;
+      --alert-red: #e53935;
+      --alert-amber: #ffb300;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      user-select: none;
     }
 
     body {
-      background: linear-gradient(135deg, #215912, #0f2c08);
-      color: #F2F2F2;
+      background-color: var(--bg-dark);
+      color: var(--text-light);
       min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+
+    .zara-window {
+      width: 100%;
+      max-width: 980px;
+      background-color: var(--panel-bg);
+      border: 2px solid var(--panel-border);
+      border-radius: 6px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Barra de Título */
+    .title-bar {
+      background: linear-gradient(90deg, var(--green-deep), var(--green-dark));
+      padding: 8px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--green-bright);
+    }
+
+    .title-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .station-logo {
+      background: var(--green-bright);
+      color: #0b1908;
+      font-weight: 900;
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      border-radius: 3px;
+      letter-spacing: 1px;
+    }
+
+    .station-name {
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 1.5px;
+      color: var(--text-light);
+    }
+
+    .sync-indicator {
+      font-size: 0.75rem;
+      color: var(--text-light);
+      background: rgba(0, 0, 0, 0.35);
+      padding: 3px 10px;
+      border-radius: 4px;
+      border: 1px solid rgba(70, 191, 36, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sync-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--green-mid);
+    }
+
+    .sync-dot.scanning {
+      background-color: var(--green-bright);
+      box-shadow: 0 0 8px var(--green-bright);
+    }
+
+    /* Painel Superior */
+    .broadcast-deck {
+      display: grid;
+      grid-template-columns: 180px 1fr 210px;
+      gap: 10px;
+      padding: 12px;
+      background-color: #101c0e;
+      border-bottom: 2px solid var(--panel-border);
+    }
+
+    @media (max-width: 768px) {
+      .broadcast-deck {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .deck-box {
+      background-color: #091108;
+      border: 1px solid var(--green-deep);
+      border-radius: 4px;
+      padding: 10px;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      align-items: center;
-      padding: 20px;
     }
 
-    .radio-header {
-      font-size: 2rem;
-      font-weight: 800;
-      letter-spacing: 2px;
-      color: #F2F2F2;
-      margin-bottom: 24px;
-      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-      text-align: center;
+    .deck-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
     }
 
-    .player-card {
-      background: rgba(33, 89, 18, 0.35);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(70, 191, 36, 0.25);
-      border-radius: 24px;
-      padding: 28px;
-      width: 100%;
-      max-width: 440px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-      text-align: center;
+    .digital-clock {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 1.95rem;
+      font-weight: 700;
+      color: var(--green-bright);
+      text-shadow: 0 0 10px rgba(70, 191, 36, 0.35);
+      line-height: 1.1;
     }
 
-    .disc-icon {
-      width: 120px;
-      height: 120px;
-      margin: 0 auto 20px;
-      border-radius: 50%;
-      background: conic-gradient(from 0deg, #46BF24, #348C1C, #2B7317, #215912, #46BF24);
+    .digital-date {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+      text-transform: capitalize;
+    }
+
+    .now-playing-box {
+      justify-content: space-between;
+    }
+
+    .on-air-header {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 30px rgba(70, 191, 36, 0.4);
-      animation: spin 10s linear infinite;
-      animation-play-state: paused;
-    }
-
-    .disc-icon.playing {
-      animation-play-state: running;
-    }
-
-    .disc-icon::after {
-      content: '';
-      width: 36px;
-      height: 36px;
-      background: #14350b;
-      border: 4px solid #2B7317;
-      border-radius: 50%;
-    }
-
-    @keyframes spin {
-      100% { transform: rotate(360deg); }
-    }
-
-    .song-title {
-      font-size: 1.15rem;
-      font-weight: 600;
       margin-bottom: 6px;
+    }
+
+    .status-badge {
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 3px;
+      letter-spacing: 1px;
+      background-color: #2c352b;
+      color: #aaa;
+    }
+
+    .status-badge.on-air {
+      background-color: var(--alert-red);
+      color: #fff;
+      box-shadow: 0 0 10px rgba(229, 57, 53, 0.6);
+      animation: pulse-air 1.5s infinite;
+    }
+
+    .status-badge.paused {
+      background-color: var(--alert-amber);
+      color: #000;
+    }
+
+    @keyframes pulse-air {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.75; }
+    }
+
+    .track-title-display {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-light);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      color: #F2F2F2;
+      margin-bottom: 8px;
     }
 
-    .status-text {
-      font-size: 0.85rem;
-      color: #c8e6c9;
-      margin-bottom: 16px;
-    }
-
-    audio {
+    .progress-wrapper {
       width: 100%;
-      outline: none;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      accent-color: #46BF24;
+      height: 14px;
+      background-color: #162613;
+      border: 1px solid var(--green-dark);
+      border-radius: 2px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 8px;
     }
 
-    .playlist-container {
-      max-height: 220px;
-      overflow-y: auto;
-      border-top: 1px solid rgba(242, 242, 242, 0.15);
-      padding-top: 16px;
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--green-mid), var(--green-bright));
+      transition: width 0.1s linear;
+    }
+
+    .vu-meter {
+      display: flex;
+      gap: 3px;
+      height: 8px;
+      align-items: center;
+    }
+
+    .vu-bar {
+      flex: 1;
+      height: 100%;
+      background-color: #1a2d17;
+      border-radius: 1px;
+      transition: background-color 0.06s ease;
+    }
+
+    .timers-box {
+      text-align: right;
+    }
+
+    .remaining-time {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-light);
+      line-height: 1.1;
+    }
+
+    .remaining-time.ending-soon {
+      color: var(--alert-red);
+      animation: pulse-air 0.8s infinite;
+    }
+
+    .elapsed-total {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Botões de Transporte */
+    .transport-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background-color: var(--panel-bg);
+      border-bottom: 1px solid var(--panel-border);
+    }
+
+    .transport-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .zara-btn {
+      background: linear-gradient(180deg, var(--green-dark), var(--green-deep));
+      color: var(--text-light);
+      border: 1px solid var(--green-bright);
+      border-radius: 4px;
+      padding: 8px 13px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+
+    .zara-btn:hover {
+      background: linear-gradient(180deg, var(--green-mid), var(--green-dark));
+      box-shadow: 0 0 8px rgba(70, 191, 36, 0.4);
+    }
+
+    .zara-btn:active {
+      transform: translateY(1px);
+    }
+
+    .zara-btn.btn-play {
+      background: linear-gradient(180deg, #46BF24, #2B7317);
+      color: #061104;
+    }
+
+    .zara-btn.btn-stop {
+      border-color: #ef5350;
+      background: linear-gradient(180deg, #5c1c1c, #3b1010);
+    }
+
+    .zara-btn.btn-stop:hover {
+      background: linear-gradient(180deg, #7a2323, #4d1414);
+    }
+
+    .zara-btn.active-mode {
+      background: var(--green-bright);
+      color: #061104;
+      box-shadow: 0 0 10px rgba(70, 191, 36, 0.5);
+    }
+
+    .volume-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #091108;
+      padding: 6px 12px;
+      border-radius: 4px;
+      border: 1px solid var(--green-deep);
+    }
+
+    .volume-control label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .volume-control input[type="range"] {
+      width: 85px;
+      accent-color: var(--green-bright);
+      cursor: pointer;
+    }
+
+    /* Cartucheira de Vinhetas (Estilo ZaraRadio F1-F9) */
+    .jingles-rack {
+      background-color: #0f1b0d;
+      padding: 10px 12px;
+      border-bottom: 2px solid var(--panel-border);
+    }
+
+    .jingles-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .jingles-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--green-bright);
+    }
+
+    .btn-stop-jingle {
+      background: transparent;
+      border: 1px solid #ef5350;
+      color: #ef5350;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+      display: none;
+    }
+
+    .btn-stop-jingle.visible {
+      display: inline-block;
+    }
+
+    .jingles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 6px;
+    }
+
+    .jingle-pad {
+      background: linear-gradient(180deg, #1b3317, #11220e);
+      border: 1px solid var(--green-dark);
+      border-radius: 4px;
+      padding: 7px 10px;
       text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.12s ease;
+      overflow: hidden;
     }
 
-    .playlist-container::-webkit-scrollbar {
-      width: 6px;
+    .jingle-pad:hover {
+      border-color: var(--green-bright);
+      background: linear-gradient(180deg, #254620, #162b12);
     }
 
-    .playlist-container::-webkit-scrollbar-thumb {
-      background: rgba(70, 191, 36, 0.3);
+    .jingle-pad.playing-jingle {
+      background: linear-gradient(180deg, #46BF24, #2B7317);
+      border-color: #F2F2F2;
+      box-shadow: 0 0 12px rgba(70, 191, 36, 0.6);
+    }
+
+    .jingle-pad.playing-jingle .jingle-key {
+      background: #091108;
+      color: var(--green-bright);
+    }
+
+    .jingle-pad.playing-jingle .jingle-name {
+      color: #061104;
+      font-weight: 800;
+    }
+
+    .jingle-key {
+      background: var(--green-deep);
+      color: var(--green-bright);
+      font-family: 'Consolas', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 5px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .jingle-name {
+      font-size: 0.78rem;
+      color: var(--text-light);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .jingles-empty {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 4px 0;
+    }
+
+    /* Próxima Faixa */
+    .next-track-banner {
+      background-color: #0c170a;
+      padding: 6px 12px;
+      border-bottom: 1px solid var(--green-deep);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+    }
+
+    .next-label {
+      background-color: var(--green-deep);
+      color: var(--green-bright);
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.72rem;
+    }
+
+    .next-title {
+      color: var(--text-light);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Grade de Programação */
+    .playlist-grid-wrapper {
+      max-height: 270px;
+      overflow-y: auto;
+      background-color: #0b1409;
+    }
+
+    .playlist-grid-wrapper::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .playlist-grid-wrapper::-webkit-scrollbar-track {
+      background: #091108;
+    }
+
+    .playlist-grid-wrapper::-webkit-scrollbar-thumb {
+      background: var(--green-dark);
       border-radius: 4px;
     }
 
-    .playlist-item {
-      padding: 10px 14px;
-      border-radius: 10px;
-      font-size: 0.88rem;
+    table.zara-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.85rem;
+    }
+
+    table.zara-table thead {
+      position: sticky;
+      top: 0;
+      background-color: var(--green-deep);
+      color: var(--text-light);
+      z-index: 2;
+    }
+
+    table.zara-table th {
+      padding: 8px 12px;
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--green-bright);
+    }
+
+    table.zara-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid #182b15;
+      color: var(--text-light);
+    }
+
+    table.zara-table tbody tr {
       cursor: pointer;
-      color: #d1e7dd;
-      transition: all 0.2s ease;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin-bottom: 6px;
-      background: rgba(33, 89, 18, 0.2);
-      border: 1px solid rgba(70, 191, 36, 0.1);
+      transition: background-color 0.1s ease;
     }
 
-    .playlist-item:hover {
-      background: rgba(52, 140, 28, 0.4);
-      color: #F2F2F2;
+    table.zara-table tbody tr:nth-child(even) {
+      background-color: #0e1a0c;
     }
 
-    .playlist-item.active {
-      background: rgba(70, 191, 36, 0.25);
-      color: #46BF24;
-      font-weight: 600;
-      border-color: rgba(70, 191, 36, 0.5);
+    table.zara-table tbody tr:hover {
+      background-color: rgba(52, 140, 28, 0.35);
+    }
+
+    table.zara-table tbody tr.row-playing {
+      background-color: rgba(70, 191, 36, 0.25);
+      color: var(--green-bright);
+      font-weight: 700;
+    }
+
+    table.zara-table tbody tr.row-playing td {
+      color: var(--green-bright);
+    }
+
+    .col-num { width: 45px; text-align: center; }
+    .col-time { width: 85px; font-family: 'Consolas', monospace; color: var(--text-muted); }
+    .col-status { width: 95px; text-align: right; font-size: 0.75rem; }
+
+    /* Rodapé */
+    .status-footer {
+      background-color: #091108;
+      padding: 6px 12px;
+      border-top: 1px solid var(--green-deep);
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-muted);
     }
   </style>
 </head>
 <body>
 
-  <div class="radio-header">RÁDIO EPT</div>
+  <div class="zara-window">
+    <!-- Barra Superior -->
+    <div class="title-bar">
+      <div class="title-bar-left">
+        <span class="station-logo">ON-AIR</span>
+        <span class="station-name">RÁDIO EPT</span>
+      </div>
+      <div class="sync-indicator">
+        <span class="sync-dot" id="syncDot"></span>
+        <span id="syncText">Monitorando /musicas e /vinhetas</span>
+      </div>
+    </div>
 
-  <div class="player-card">
-    <div class="disc-icon" id="discIcon"></div>
-    <div class="song-title" id="songTitle">Buscando músicas...</div>
-    <div class="status-text" id="statusText">Lendo a pasta automaticamente</div>
+    <!-- Deck Principal -->
+    <div class="broadcast-deck">
+      <div class="deck-box">
+        <span class="deck-label">Hora Oficial</span>
+        <div class="digital-clock" id="digitalClock">00:00:00</div>
+        <div class="digital-date" id="digitalDate">--/--/----</div>
+      </div>
 
-    <audio id="audioPlayer" controls></audio>
+      <div class="deck-box now-playing-box">
+        <div class="on-air-header">
+          <span class="deck-label">Em Execução</span>
+          <span class="status-badge" id="airBadge">AGUARDANDO</span>
+        </div>
+        <div class="track-title-display" id="songTitle">Carregando acervo da pasta /musicas...</div>
+        
+        <div class="progress-wrapper" id="progressBar" title="Clique para avançar na faixa">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
 
-    <div class="playlist-container" id="playlistContainer"></div>
+        <div class="vu-meter" id="vuMeter"></div>
+      </div>
+
+      <div class="deck-box timers-box">
+        <span class="deck-label">Tempo Restante</span>
+        <div class="remaining-time" id="remainingTime">-00:00</div>
+        <div class="elapsed-total" id="elapsedTotal">00:00 / 00:00</div>
+      </div>
+    </div>
+
+    <!-- Console de Controle -->
+    <div class="transport-bar">
+      <div class="transport-buttons">
+        <button class="zara-btn btn-play" id="btnPlay" title="Iniciar Reprodução">▶ PLAY</button>
+        <button class="zara-btn" id="btnPause" title="Pausar">❚❚ PAUSE</button>
+        <button class="zara-btn btn-stop" id="btnStop" title="Parar e Zerar">■ STOP</button>
+        <button class="zara-btn" id="btnNext" title="Pular para Próxima Faixa">⏭ PRÓXIMA</button>
+        <button class="zara-btn" id="btnFade" title="Atenuar volume e trocar faixa">↘ FADE OUT</button>
+        <button class="zara-btn active-mode" id="btnAutoMode" title="Avanço Automático Contínuo">↻ AUTO: ON</button>
+      </div>
+
+      <div class="volume-control">
+        <label for="volumeSlider">VOL</label>
+        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+        <span id="volumeLabel" style="font-size: 0.75rem; font-family: monospace; width: 34px;">100%</span>
+      </div>
+    </div>
+
+    <!-- Cartucheira de Vinhetas Rápidas -->
+    <div class="jingles-rack">
+      <div class="jingles-header">
+        <span class="jingles-title">Cartucheira de Vinhetas (Atalhos F1 – F9)</span>
+        <button class="btn-stop-jingle" id="btnStopJingle">■ PARAR VINHETA</button>
+      </div>
+      <div class="jingles-grid" id="jinglesGrid">
+        <div class="jingles-empty">Buscando vinhetas na pasta /vinhetas...</div>
+      </div>
+    </div>
+
+    <!-- Próxima Faixa -->
+    <div class="next-track-banner">
+      <span class="next-label">SEGUINTE</span>
+      <span class="next-title" id="nextTrackTitle">Aguardando lista...</span>
+    </div>
+
+    <!-- Tabela de Programação -->
+    <div class="playlist-grid-wrapper">
+      <table class="zara-table">
+        <thead>
+          <tr>
+            <th class="col-num">#</th>
+            <th class="col-time">Hora Est.</th>
+            <th>Título da Faixa / Arquivo</th>
+            <th class="col-status">Status</th>
+          </tr>
+        </thead>
+        <tbody id="playlistBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Rodapé -->
+    <div class="status-footer">
+      <span id="footerStatus">Conectando ao repositório fsscriativa/viicoloquioept...</span>
+      <span id="totalTracksFooter">0 músicas | 0 vinhetas</span>
+    </div>
   </div>
+
+  <!-- Players Ocultos (Música Principal + Canal Auxiliar de Vinhetas) -->
+  <audio id="audioPlayer" crossorigin="anonymous"></audio>
+  <audio id="jinglePlayer" crossorigin="anonymous"></audio>
 
   <script>
     const GITHUB_USER = 'fsscriativa';
     const GITHUB_REPO = 'viicoloquioept';
-    const FOLDER_NAME = 'musicas';
+    const MUSIC_FOLDER = 'musicas';
+    const JINGLES_FOLDER = 'vinhetas';
+    const CHECK_INTERVAL_MS = 15000;
 
     let playlist = [];
+    let jingles = [];
     let currentIndex = 0;
+    let activeJingleIndex = -1;
+    let isInitialLoad = true;
+    let autoAdvance = true;
+    let isFading = false;
+    let savedUserVolume = 1.0;
 
+    // Elementos DOM
     const audioPlayer = document.getElementById('audioPlayer');
+    const jinglePlayer = document.getElementById('jinglePlayer');
     const songTitle = document.getElementById('songTitle');
-    const statusText = document.getElementById('statusText');
-    const playlistContainer = document.getElementById('playlistContainer');
-    const discIcon = document.getElementById('discIcon');
+    const nextTrackTitle = document.getElementById('nextTrackTitle');
+    const airBadge = document.getElementById('airBadge');
+    const remainingTime = document.getElementById('remainingTime');
+    const elapsedTotal = document.getElementById('elapsedTotal');
+    const progressBar = document.getElementById('progressBar');
+    const progressFill = document.getElementById('progressFill');
+    const playlistBody = document.getElementById('playlistBody');
+    const jinglesGrid = document.getElementById('jinglesGrid');
+    const btnStopJingle = document.getElementById('btnStopJingle');
+    const footerStatus = document.getElementById('footerStatus');
+    const totalTracksFooter = document.getElementById('totalTracksFooter');
+    const syncDot = document.getElementById('syncDot');
+    const syncText = document.getElementById('syncText');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const volumeLabel = document.getElementById('volumeLabel');
+    const vuMeter = document.getElementById('vuMeter');
 
-    async function fetchGitHubFolder() {
+    // Criar segmentos do VU Meter
+    const VU_SEGMENTS = 28;
+    const vuBars = [];
+    for (let i = 0; i < VU_SEGMENTS; i++) {
+      const bar = document.createElement('div');
+      bar.className = 'vu-bar';
+      vuMeter.appendChild(bar);
+      vuBars.push(bar);
+    }
+
+    // Relógio Digital
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('digitalClock').textContent = now.toLocaleTimeString('pt-BR');
+      document.getElementById('digitalDate').textContent = now.toLocaleDateString('pt-BR', {
+        weekday: 'short',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function formatTime(sec) {
+      if (isNaN(sec) || !isFinite(sec)) return '00:00';
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    // Buscar arquivos de uma pasta específica no GitHub
+    async function fetchFolderFiles(folderName) {
+      const apiUrl = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${folderName}?t=${Date.now()}`;
+      const response = await fetch(apiUrl);
+      if (!response.ok) return [];
+      const files = await response.json();
+      if (!Array.isArray(files)) return [];
+
+      return files
+        .filter(file => file.name.toLowerCase().endsWith('.mp3'))
+        .map(file => ({
+          id: file.sha,
+          title: file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " "),
+          url: file.download_url
+        }));
+    }
+
+    // Sincronização periódica das pastas /musicas e /vinhetas
+    async function syncAllFolders() {
+      syncDot.classList.add('scanning');
+      syncText.textContent = 'Sincronizando pastas...';
+
       try {
-        const apiUrl = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${FOLDER_NAME}`;
-        const response = await fetch(apiUrl);
-        const files = await response.json();
+        const [remoteTracks, remoteJingles] = await Promise.all([
+          fetchFolderFiles(MUSIC_FOLDER),
+          fetchFolderFiles(JINGLES_FOLDER)
+        ]);
 
-        if (!Array.isArray(files)) {
-          throw new Error('A resposta da API do GitHub não retornou uma lista.');
+        // 1. Atualizar Playlist de Músicas
+        if (hasListChanged(remoteTracks, playlist)) {
+          const wasEmpty = playlist.length === 0;
+          playlist = remoteTracks;
+
+          if (isInitialLoad || wasEmpty) {
+            if (playlist.length > 0) {
+              loadTrack(0, false);
+              footerStatus.textContent = 'Acervo carregado. Pronto para entrar no ar.';
+            } else {
+              songTitle.textContent = 'Pasta /musicas vazia';
+              footerStatus.textContent = 'Aguardando envio de arquivos .mp3.';
+            }
+            isInitialLoad = false;
+          } else {
+            footerStatus.textContent = 'Grade atualizada automaticamente com novas músicas.';
+          }
+
+          updateNextTrackDisplay();
+          renderPlaylist();
         }
 
-        playlist = files
-          .filter(file => file.name.toLowerCase().endsWith('.mp3'))
-          .map(file => ({
-            title: file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " "),
-            url: file.download_url
-          }));
-
-        if (playlist.length === 0) {
-          songTitle.textContent = 'Pasta vazia';
-          statusText.textContent = 'Nenhum arquivo .mp3 encontrado na pasta /musicas.';
-          return;
+        // 2. Atualizar Cartucheira de Vinhetas (máx 9 atalhos F1-F9)
+        const limitedJingles = remoteJingles.slice(0, 9);
+        if (hasListChanged(limitedJingles, jingles)) {
+          jingles = limitedJingles;
+          renderJingles();
         }
 
-        renderPlaylist();
-        setTrack(0, false);
-        statusText.textContent = `${playlist.length} músicas carregadas automaticamente.`;
-      } catch (error) {
-        songTitle.textContent = 'Erro ao ler pasta';
-        statusText.textContent = 'Verifique se a pasta "musicas" existe na raiz.';
-        console.error(error);
+        totalTracksFooter.textContent = `${playlist.length} música(s) | ${jingles.length} vinheta(s)`;
+      } catch (err) {
+        console.error('Erro na sincronização:', err);
+      } finally {
+        setTimeout(() => {
+          syncDot.classList.remove('scanning');
+          syncText.textContent = 'Monitorando /musicas e /vinhetas';
+        }, 1200);
       }
     }
 
-    function renderPlaylist() {
-      playlistContainer.innerHTML = '';
-      playlist.forEach((track, index) => {
-        const item = document.createElement('div');
-        item.className = `playlist-item ${index === currentIndex ? 'active' : ''}`;
-        item.textContent = `${index + 1}. ${track.title}`;
-        item.onclick = () => setTrack(index, true);
-        playlistContainer.appendChild(item);
+    function hasListChanged(newList, oldList) {
+      if (newList.length !== oldList.length) return true;
+      return newList.some((item, i) => item.url !== oldList[i]?.url);
+    }
+
+    // Renderizar Cartucheira de Vinhetas
+    function renderJingles() {
+      jinglesGrid.innerHTML = '';
+      if (jingles.length === 0) {
+        jinglesGrid.innerHTML = '<div class="jingles-empty">Crie a pasta /vinhetas na raiz do GitHub e adicione arquivos .mp3 para ativar os botões F1–F9.</div>';
+        return;
+      }
+
+      jingles.forEach((jingle, idx) => {
+        const pad = document.createElement('button');
+        pad.className = 'jingle-pad';
+        if (idx === activeJingleIndex) pad.classList.add('playing-jingle');
+        pad.title = `Disparar vinheta: ${jingle.title} (Tecla F${idx + 1})`;
+        pad.innerHTML = `
+          <span class="jingle-key">F${idx + 1}</span>
+          <span class="jingle-name">${jingle.title}</span>
+        `;
+        pad.onclick = () => triggerJingle(idx);
+        jinglesGrid.appendChild(pad);
       });
     }
 
-    function setTrack(index, autoPlay = false) {
+    // Disparar Vinheta com Ducking (reduz volume da música e restaura ao terminar)
+    function triggerJingle(index) {
+      if (index < 0 || index >= jingles.length) return;
+
+      // Se clicar na mesma vinheta que está tocando, para ela
+      if (activeJingleIndex === index && !jinglePlayer.paused) {
+        stopJingle();
+        return;
+      }
+
+      activeJingleIndex = index;
+      const jingle = jingles[index];
+
+      // Abaixa suavemente o volume da música principal para 20% do volume definido
+      if (!audioPlayer.paused && !isFading) {
+        audioPlayer.volume = savedUserVolume * 0.2;
+      }
+
+      jinglePlayer.src = jingle.url;
+      jinglePlayer.volume = savedUserVolume;
+      jinglePlayer.play().then(() => {
+        btnStopJingle.classList.add('visible');
+        footerStatus.textContent = `Vinheta no ar: ${jingle.title}`;
+        renderJingles();
+      }).catch(err => {
+        console.warn('Erro ao tocar vinheta:', err);
+        stopJingle();
+      });
+    }
+
+    function stopJingle() {
+      jinglePlayer.pause();
+      jinglePlayer.currentTime = 0;
+      activeJingleIndex = -1;
+      btnStopJingle.classList.remove('visible');
+
+      // Restaura o volume da música principal
+      if (!isFading) {
+        audioPlayer.volume = savedUserVolume;
+      }
+      renderJingles();
+    }
+
+    jinglePlayer.onended = () => {
+      stopJingle();
+      footerStatus.textContent = 'Vinheta concluída. Volume principal restaurado.';
+    };
+
+    btnStopJingle.onclick = stopJingle;
+
+    // Atalhos de Teclado F1 a F9 para Vinhetas (igual ao ZaraRadio)
+    window.addEventListener('keydown', (e) => {
+      if (e.key.startsWith('F') && e.key.length === 2) {
+        const num = parseInt(e.key.substring(1), 10);
+        if (num >= 1 && num <= 9) {
+          e.preventDefault();
+          triggerJingle(num - 1);
+        }
+      }
+    });
+
+    function updateNextTrackDisplay() {
+      if (playlist.length === 0) {
+        nextTrackTitle.textContent = 'Nenhuma faixa na fila';
+        return;
+      }
+      const nextIdx = (currentIndex + 1) % playlist.length;
+      nextTrackTitle.textContent = `${nextIdx + 1}. ${playlist[nextIdx].title}`;
+    }
+
+    function renderPlaylist() {
+      playlistBody.innerHTML = '';
+      const now = new Date();
+      let estimatedOffsetSec = 0;
+      if (!isNaN(audioPlayer.duration) && !isNaN(audioPlayer.currentTime)) {
+        estimatedOffsetSec = Math.max(0, audioPlayer.duration - audioPlayer.currentTime);
+      }
+
+      playlist.forEach((track, index) => {
+        const tr = document.createElement('tr');
+        if (index === currentIndex) tr.className = 'row-playing';
+
+        let timeLabel = '--:--';
+        let statusLabel = 'Na Fila';
+
+        if (index === currentIndex) {
+          timeLabel = 'AGORA';
+          statusLabel = audioPlayer.paused ? 'CARREGADA' : 'NO AR';
+        } else if (index > currentIndex) {
+          const estDate = new Date(now.getTime() + estimatedOffsetSec * 1000);
+          timeLabel = estDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+          estimatedOffsetSec += 210;
+        } else {
+          statusLabel = 'Tocada';
+        }
+
+        tr.innerHTML = `
+          <td class="col-num">${index + 1}</td>
+          <td class="col-time">${timeLabel}</td>
+          <td>${track.title}</td>
+          <td class="col-status">${statusLabel}</td>
+        `;
+
+        tr.onclick = () => loadTrack(index, true);
+        playlistBody.appendChild(tr);
+      });
+    }
+
+    function loadTrack(index, autoPlay = false) {
       if (index < 0 || index >= playlist.length) return;
-      
       currentIndex = index;
       const track = playlist[currentIndex];
-      
+
       songTitle.textContent = track.title;
-      statusText.textContent = `Faixa ${currentIndex + 1} de ${playlist.length}`;
       audioPlayer.src = track.url;
+      audioPlayer.volume = activeJingleIndex !== -1 ? savedUserVolume * 0.2 : savedUserVolume;
       audioPlayer.load();
 
+      updateNextTrackDisplay();
       renderPlaylist();
 
       if (autoPlay) {
-        audioPlayer.play().catch(err => {
-          console.warn("Autoplay bloqueado pelo navegador:", err);
-          statusText.textContent = 'Clique no play do player para iniciar.';
+        audioPlayer.play().catch(() => {
+          footerStatus.textContent = 'Clique em PLAY para liberar o áudio no navegador.';
         });
       }
     }
 
-    audioPlayer.onended = () => {
-      let nextIndex = currentIndex + 1;
-      if (nextIndex >= playlist.length) nextIndex = 0;
-      setTrack(nextIndex, true);
+    // Controles do Console
+    document.getElementById('btnPlay').onclick = () => {
+      if (playlist.length === 0) return;
+      if (!audioPlayer.src) {
+        loadTrack(currentIndex, true);
+      } else {
+        audioPlayer.play();
+      }
     };
 
-    audioPlayer.onplay = () => discIcon.classList.add('playing');
-    audioPlayer.onpause = () => discIcon.classList.remove('playing');
+    document.getElementById('btnPause').onclick = () => audioPlayer.pause();
 
-    window.onload = fetchGitHubFolder;
+    document.getElementById('btnStop').onclick = () => {
+      audioPlayer.pause();
+      audioPlayer.currentTime = 0;
+      updateAirStatus('STOP');
+      renderPlaylist();
+    };
+
+    document.getElementById('btnNext').onclick = () => {
+      if (playlist.length === 0) return;
+      const nextIdx = (currentIndex + 1) % playlist.length;
+      loadTrack(nextIdx, true);
+    };
+
+    document.getElementById('btnFade').onclick = () => {
+      if (audioPlayer.paused || isFading || playlist.length === 0) return;
+      isFading = true;
+      footerStatus.textContent = 'Executando Fade Out...';
+      const startVol = audioPlayer.volume;
+      const fadeStep = startVol / 20;
+
+      const fadeInterval = setInterval(() => {
+        if (audioPlayer.volume > fadeStep) {
+          audioPlayer.volume = Math.max(0, audioPlayer.volume - fadeStep);
+        } else {
+          clearInterval(fadeInterval);
+          isFading = false;
+          const nextIdx = (currentIndex + 1) % playlist.length;
+          loadTrack(nextIdx, true);
+          footerStatus.textContent = 'Transição concluída.';
+        }
+      }, 100);
+    };
+
+    const btnAutoMode = document.getElementById('btnAutoMode');
+    btnAutoMode.onclick = () => {
+      autoAdvance = !autoAdvance;
+      btnAutoMode.textContent = autoAdvance ? '↻ AUTO: ON' : '↻ AUTO: OFF';
+      btnAutoMode.classList.toggle('active-mode', autoAdvance);
+    };
+
+    volumeSlider.oninput = (e) => {
+      savedUserVolume = parseFloat(e.target.value);
+      audioPlayer.volume = activeJingleIndex !== -1 ? savedUserVolume * 0.2 : savedUserVolume;
+      jinglePlayer.volume = savedUserVolume;
+      volumeLabel.textContent = `${Math.round(savedUserVolume * 100)}%`;
+    };
+
+    progressBar.onclick = (e) => {
+      if (!audioPlayer.duration) return;
+      const rect = progressBar.getBoundingClientRect();
+      const pos = (e.clientX - rect.left) / rect.width;
+      audioPlayer.currentTime = pos * audioPlayer.duration;
+    };
+
+    function updateAirStatus(state) {
+      airBadge.className = 'status-badge';
+      if (state === 'PLAYING') {
+        airBadge.textContent = 'NO AR';
+        airBadge.classList.add('on-air');
+      } else if (state === 'PAUSED') {
+        airBadge.textContent = 'PAUSADO';
+        airBadge.classList.add('paused');
+      } else {
+        airBadge.textContent = 'PARADO';
+      }
+    }
+
+    audioPlayer.onplay = () => {
+      updateAirStatus('PLAYING');
+      renderPlaylist();
+    };
+
+    audioPlayer.onpause = () => {
+      if (audioPlayer.currentTime > 0 && !audioPlayer.ended) {
+        updateAirStatus('PAUSED');
+      }
+      renderPlaylist();
+    };
+
+    audioPlayer.ontimeupdate = () => {
+      const cur = audioPlayer.currentTime;
+      const dur = audioPlayer.duration;
+
+      if (dur > 0) {
+        const pct = (cur / dur) * 100;
+        progressFill.style.width = `${pct}%`;
+
+        const rem = Math.max(0, dur - cur);
+        remainingTime.textContent = `-${formatTime(rem)}`;
+        elapsedTotal.textContent = `${formatTime(cur)} / ${formatTime(dur)}`;
+
+        if (rem <= 15 && !audioPlayer.paused) {
+          remainingTime.classList.add('ending-soon');
+        } else {
+          remainingTime.classList.remove('ending-soon');
+        }
+      }
+    };
+
+    audioPlayer.onended = () => {
+      remainingTime.classList.remove('ending-soon');
+      if (autoAdvance && playlist.length > 0) {
+        const nextIdx = (currentIndex + 1) % playlist.length;
+        loadTrack(nextIdx, true);
+      } else {
+        updateAirStatus('STOP');
+      }
+    };
+
+    // VU Meter reage tanto à música principal quanto às vinhetas
+    function animateVuMeter() {
+      const isMusicPlaying = !audioPlayer.paused && !audioPlayer.ended;
+      const isJinglePlaying = !jinglePlayer.paused && !jinglePlayer.ended;
+
+      if (isMusicPlaying || isJinglePlaying) {
+        const activeVol = isJinglePlaying ? jinglePlayer.volume : audioPlayer.volume;
+        const activeCount = Math.floor((Math.random() * 0.45 + 0.45) * VU_SEGMENTS * activeVol);
+        vuBars.forEach((bar, idx) => {
+          if (idx < activeCount) {
+            if (idx > VU_SEGMENTS * 0.82) {
+              bar.style.backgroundColor = '#e53935';
+            } else if (idx > VU_SEGMENTS * 0.65) {
+              bar.style.backgroundColor = '#ffb300';
+            } else {
+              bar.style.backgroundColor = '#46BF24';
+            }
+          } else {
+            bar.style.backgroundColor = '#1a2d17';
+          }
+        });
+      } else {
+        vuBars.forEach(bar => bar.style.backgroundColor = '#1a2d17');
+      }
+      requestAnimationFrame(animateVuMeter);
+    }
+    animateVuMeter();
+
+    window.onload = () => {
+      syncAllFolders();
+      setInterval(syncAllFolders, CHECK_INTERVAL_MS);
+    };
   </script>
 </body>
 </html>
